@@ -26,10 +26,10 @@ var oNodeBase = Nodetree.createNode( 'id_myNode_base', { some_attribute: 'base' 
 ```javascript
 var oNodeBase = Nodetree.createNode( 'id_myNode_base', { some_attribute: 'base' } )
 
-var oNodeChild_1 = Tree.createNode( 'id_myNode_child_1' )
-var oNodeChild_2 = Tree.createNode( 'id_myNode_child_2' )
-var oNodeChild_3 = Tree.createNode( 'id_myNode_child_3' )
-var oNodeChild_4 = Tree.createNode( 'id_myNode_child_4' )
+var oNodeChild_1 = Nodetree.createNode( 'id_myNode_child_1' )
+var oNodeChild_2 = Nodetree.createNode( 'id_myNode_child_2' )
+var oNodeChild_3 = Nodetree.createNode( 'id_myNode_child_3' )
+var oNodeChild_4 = Nodetree.createNode( 'id_myNode_child_4' )
 
 oNodeBase.append( oNodeChild_1 )
 oNodeBase.prepend( oNodeChild_2 )
@@ -42,7 +42,7 @@ var sSerialized = oNodeBase.toString()
 // get hashcode of the node tree
 var sHashCode = oNodeBase.hashcode()
 // create a new node tree from a serialized one
-var oNewNodeTree = Tree.loadFromString( sSerialized )
+var oNewNodeTree = Nodetree.loadFromString( sSerialized )
 
 // get a node inside the tree with the id
 oNodeChild_4 = oNewNodeTree.getElementById( 'id_myNode_child_4' )
