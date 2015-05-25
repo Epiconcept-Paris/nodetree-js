@@ -1,10 +1,30 @@
 # nodetree-js
+------
 Library for node tree building, navigation and serialization
 
+### Installation
+To start using Nodetree-JS in your website, simply download it and include it in your page:
+```html
+<script src="nodetree-js.js"></script>
+```
+Or install it as a Node.js module:
+```
+$ npm install --save nodetree-js
+```
+### Using Nodetree-JS
+In the browser, getting started is as simple as:
 ```javascript
-var Tree = require( './libs/nodetree-js' )
+var oNodeBase = Nodetree.createNode( 'id_myNode_base', { some_attribute: 'base' } )
+```
+In Node.js, you'll need to require() it first:
+```javascript
+var Nodetree = require( 'nodetree-js' )
+var oNodeBase = Nodetree.createNode( 'id_myNode_base', { some_attribute: 'base' } )
+```
 
-var oNodeBase = Tree.createNode( 'id_myNode_base', { some_attribute: 'base' } )
+### Usage
+```javascript
+var oNodeBase = Nodetree.createNode( 'id_myNode_base', { some_attribute: 'base' } )
 
 var oNodeChild_1 = Tree.createNode( 'id_myNode_child_1' )
 var oNodeChild_2 = Tree.createNode( 'id_myNode_child_2' )
