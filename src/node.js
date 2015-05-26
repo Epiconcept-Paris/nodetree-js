@@ -9,8 +9,14 @@ var Node = function( sId, oAttributes, aChildNodes )
 {
     this.sId         = ( sId != undefined ) ? sId : "uniqId"
     this.oAttributes = ( oAttributes != undefined ) ? oAttributes : {}
-    this.aChildNodes = ( aChildNodes != undefined ) ? aChildNodes : []
+    this.aChildNodes = []
     this.oParentNode = undefined
+
+    if ( aChildNodes != undefined ) {
+        for (var i = 0; i < aChildNodes.length; i++) {
+            this.append( aChildNodes[i] )
+        }
+    }
 }
 
 /**
@@ -18,7 +24,8 @@ var Node = function( sId, oAttributes, aChildNodes )
  * Return the parent node
  *
  * @method  parentNode
- * @param   {Node}   oParentNode
+ * @param   {Node}   oParentNode    - (optional)
+ * @return  {Node}
  */
 Node.prototype.parentNode = function ( oParentNode )
 {
@@ -42,12 +49,43 @@ Node.prototype.append =
  *
  * @method  appendChild
  * @param   {Node}    oNode
+ * @return  {boolean}
  */
 Node.prototype.appendChild = function ( oNode )
 {
+    return this.insertAtPosition( oNode, this.aChildNodes.length )
+}
 
-    this.insertAtPosition( oNode, this.aChildNodes.length )
+/**
+ * Remove a Node child from this Node
+ *
+ * @method  removeChild
+ * @param   {Node}  oNode
+ * @return  {boolean}
+ */
+Node.prototype.removeChild = function ( oNode )
+{
+    var iPosition = this.aChildNodes.indexOf( oNode )
+    if ( iPosition > -1 ) {
+        this.aChildNodes.splice( iPosition, 1 )
+        return true
+    }
+    return false
+}
 
+/**
+ * Remove the Node from its Node parent
+ *
+ * @method  removeFromParent
+ * @param   {Node}  oNode
+ * @return  {boolean}
+ */
+Node.prototype.removeFromParent = function ()
+{
+    if ( this.parentNode() != undefined ) {
+        return this.parentNode().removeChild( this )
+    }
+    return false
 }
 
 /**
@@ -56,6 +94,7 @@ Node.prototype.appendChild = function ( oNode )
  *
  * @method  prepend
  * @param   {Node}    oNode
+ * @return  {boolean}
  */
 Node.prototype.prepend =
 /**
@@ -63,10 +102,11 @@ Node.prototype.prepend =
 *
 * @method   prependChild
 * @param    {Node}    oNode
+* @return  {boolean}
 */
 Node.prototype.prependChild = function ( oNode )
 {
-    this.insertAtPosition( oNode, 0 )
+    return this.insertAtPosition( oNode, 0 )
 }
 
 /**
@@ -74,10 +114,10 @@ Node.prototype.prependChild = function ( oNode )
  * @method  insertAtPosition
  * @param   {Node}      oNode
  * @param   {integer}   iPosition
+ * @return  {boolean}
  */
 Node.prototype.insertAtPosition = function ( oNode, iPosition )
 {
-
     if ( iPosition == undefined || iPosition < 0 || iPosition > this.aChildNodes.length ) {
         iPosition = 0
     }
@@ -86,6 +126,7 @@ Node.prototype.insertAtPosition = function ( oNode, iPosition )
     // assign the parent node
     oNode.parentNode( this )
 
+    return true
 }
 
 /**
@@ -93,6 +134,7 @@ Node.prototype.insertAtPosition = function ( oNode, iPosition )
  *
  * @method  getElementById
  * @param   {string}       sId
+ * @return  {Node}
  */
 Node.prototype.getElementById = function ( sId )
 {
@@ -118,10 +160,11 @@ Node.prototype.getElementById = function ( sId )
  * @method  insertBefore
  * @param   {Node}     oNewNode
  * @param   {Node}     oReferenceNode
+ * @return  {boolean}
  */
 Node.prototype.insertBefore = function ( oNewNode, oReferenceNode )
 {
-    this.insertAtPosition( oNewNode, this.aChildNodes.indexOf( oReferenceNode ) )
+    return this.insertAtPosition( oNewNode, this.aChildNodes.indexOf( oReferenceNode ) )
 }
 
 /**
@@ -130,20 +173,23 @@ Node.prototype.insertBefore = function ( oNewNode, oReferenceNode )
  * @method  insertAfter
  * @param   {Node}     oNewNode
  * @param   {Node}     oReferenceNode
+ * @return  {boolean}
  */
 Node.prototype.insertAfter = function ( oNewNode, oReferenceNode )
 {
-    this.insertAtPosition( oNewNode, this.aChildNodes.indexOf( oReferenceNode ) + 1 )
+    return this.insertAtPosition( oNewNode, this.aChildNodes.indexOf( oReferenceNode ) + 1 )
 }
 
 /**
  * @method  setAttribute
  * @param   {string}     sAttributeName
  * @param   {object}     oValue
+ * @return  {boolean}
  */
 Node.prototype.setAttribute = function ( sAttributeName, oValue )
 {
     this.oAttributes[ sAttributeName ] = oValue
+    return true
 }
 
 /**
@@ -162,12 +208,14 @@ Node.prototype.getAttribute = function ( sAttributeName )
  * Return the node and childs as a JSON (serialized)
  *
  * @method  serialize
+ * @return  {object}
  */
 Node.prototype.serialize =
 /**
  * Return the node and childs as a JSON (serialized)
  *
  * @method  toJson
+ * @return  {object}
  */
 Node.prototype.toJson = function ()
 {
@@ -189,6 +237,7 @@ Node.prototype.toJson = function ()
  * Return the node and childs as a String (serialized)
  *
  * @method  toString
+ * @return  {string}
  */
 Node.prototype.toString = function ()
 {

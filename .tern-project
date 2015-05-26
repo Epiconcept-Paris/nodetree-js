@@ -1,0 +1,17 @@
+{
+    "libs": [
+        "browser"
+    ],
+    "loadEagerly": [
+        "src/**/*.js",
+        "node_modules/**/*.js"
+    ],
+    "plugins": {
+        "complete_strings": {},
+        "node": {},
+        "requirejs": {},
+        "doc_comment": {
+            "fullDocs": true
+        }
+    }
+}
