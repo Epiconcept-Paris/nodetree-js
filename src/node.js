@@ -1,4 +1,6 @@
 
+var Utils = require( './utils' )
+
 /**
  * @method  Node
  * @param   {string}    sId
@@ -7,12 +9,12 @@
  */
 var Node = function( sId, oAttributes, aChildNodes )
 {
-    this.sId         = ( sId != undefined ) ? sId : "uniqId"
+    this.sId         = ( sId != undefined ) ? sId : Utils.uniqId()
     this.oAttributes = ( oAttributes != undefined ) ? oAttributes : {}
     this.aChildNodes = []
     this.oParentNode = undefined
 
-    if ( aChildNodes != undefined ) {
+    if ( aChildNodes != undefined && Array.isArray( aChildNodes ) ) {
         for (var i = 0; i < aChildNodes.length; i++) {
             this.append( aChildNodes[i] )
         }
@@ -56,6 +58,15 @@ Node.prototype.appendChild = function ( oNode )
     return this.insertAtPosition( oNode, this.aChildNodes.length )
 }
 
+/**
+ * Alias for removeChild
+ * Remove a Node child from this Node
+ *
+ * @method  remove
+ * @param   {Node}  oNode
+ * @return  {boolean}
+ */
+Node.prototype.remove =
 /**
  * Remove a Node child from this Node
  *
@@ -118,6 +129,11 @@ Node.prototype.prependChild = function ( oNode )
  */
 Node.prototype.insertAtPosition = function ( oNode, iPosition )
 {
+    if ( ( oNode instanceof Node ) == false ) {
+        Utils.error_log( new Error( 'Can\'t append this object. Wrong type, we are supposed to only have Node.' ) )
+        return false
+    }
+
     if ( iPosition == undefined || iPosition < 0 || iPosition > this.aChildNodes.length ) {
         iPosition = 0
     }
