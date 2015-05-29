@@ -122,9 +122,11 @@ Node.prototype.prependChild = function ( oNode )
 
 /**
  * Insert a node at a position in this node
+ * If no position is given, push to the end of the list
+ *
  * @method  insertAtPosition
  * @param   {Node}      oNode
- * @param   {integer}   iPosition
+ * @param   {integer}   iPosition   - (optional)
  * @return  {boolean}
  */
 Node.prototype.insertAtPosition = function ( oNode, iPosition )
@@ -135,7 +137,7 @@ Node.prototype.insertAtPosition = function ( oNode, iPosition )
     }
 
     if ( iPosition == undefined || iPosition < 0 || iPosition > this.aChildNodes.length ) {
-        iPosition = 0
+        iPosition = this.aChildNodes.length
     }
 
     this.aChildNodes.splice( iPosition, 0, oNode )
