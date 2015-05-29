@@ -9,7 +9,7 @@ To start using Nodetree-JS in your website, simply download it and include it in
 ```
 Or install it as a Node.js module:
 ```
-$ npm install --save nodetree-js
+$ npm install --save git+https://github.com/Epiconcept-Paris/nodetree-js.git
 ```
 ### Using Nodetree-JS
 In the browser, getting started is as simple as:
