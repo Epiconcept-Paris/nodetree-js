@@ -14,9 +14,11 @@
   "dependencies": {},
   "scripts": {
     "build": "browserify src/index.js -o dist/nodetree-js.js -t uglifyify --s Nodetree",
-    "test": "./node_modules/jest-cli/bin/jest.js --coverage"
+    "test": "./node_modules/jest-cli/bin/jest.js --coverage",
+    "doc": "./node_modules/jsdox/bin/jsdox --output docs src"
   },
   "devDependencies": {
-    "jest-cli": "~0.4.5"
+    "jest-cli": "~0.4.5",
+    "jsdox": "~0.4.9"
   }
 }

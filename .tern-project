@@ -4,7 +4,7 @@
     ],
     "loadEagerly": [
         "src/**/*.js",
-        "node_modules/**/*.js"
+        "node_modules/pouchdb/**/*.js"
     ],
     "plugins": {
         "complete_strings": {},
