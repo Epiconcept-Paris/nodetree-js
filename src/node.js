@@ -2,16 +2,31 @@
 var Utils = require( './utils' )
 
 /**
- * @method  Node
+ * @class  Node
  * @param   {string}    sId
  * @param   {object}    oAttributes
  * @param   {array}     aChildNodes
  */
 var Node = function( sId, oAttributes, aChildNodes )
 {
+    /**
+     * @member  {string}    sId             - The id of the node
+     */
     this.sId         = ( sId != undefined ) ? sId : Utils.uniqId()
+
+    /**
+     * @member  {object}    oAttributes     - Attributes of the node (useful to store informations like the name of the node or anything else not related to the tree structure)
+     */
     this.oAttributes = ( oAttributes != undefined ) ? oAttributes : {}
+
+    /**
+     * @member  {array}     aChildNodes     - List of all children of this node
+     */
     this.aChildNodes = []
+
+    /**
+     * @member  {Node}      oParentNode     - Parent of this node
+     */
     this.oParentNode = undefined
 
     if ( aChildNodes != undefined && Array.isArray( aChildNodes ) ) {
@@ -39,11 +54,7 @@ Node.prototype.parentNode = function ( oParentNode )
 }
 
 /**
- * Alias for appendChild
- * Add a node as a child of this node
- *
- * @method  append
- * @param   {Node}    oNode
+ * @method  append  - see appendChild
  */
 Node.prototype.append =
 /**
@@ -59,12 +70,7 @@ Node.prototype.appendChild = function ( oNode )
 }
 
 /**
- * Alias for removeChild
- * Remove a Node child from this Node
- *
- * @method  remove
- * @param   {Node}  oNode
- * @return  {boolean}
+ * @method  remove  - see removeChild
  */
 Node.prototype.remove =
 /**
@@ -100,12 +106,7 @@ Node.prototype.removeFromParent = function ()
 }
 
 /**
- * Alias for prependChild
- * Insert a node as the first child of this node
- *
- * @method  prepend
- * @param   {Node}    oNode
- * @return  {boolean}
+ * @method  prepend - see prependChild
  */
 Node.prototype.prepend =
 /**
@@ -220,13 +221,19 @@ Node.prototype.getAttribute = function ( sAttributeName )
     return this.oAttributes[ sAttributeName ]
 }
 
+/**
+ * Return children of this node
+ *
+ * @method  getChildren
+ * @return  {array}     - array of Node
+ */
+Node.prototype.getChildren = function ()
+{
+    return this.aChildNodes
+}
 
 /**
- * Alias for toJson
- * Return the node and childs as a JSON (serialized)
- *
- * @method  serialize
- * @return  {object}
+ * @method  serialize   - see toJson
  */
 Node.prototype.serialize =
 /**

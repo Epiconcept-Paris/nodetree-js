@@ -6,19 +6,14 @@
 
 * * *
 
-### Node(sId, oAttributes, aChildNodes) 
-
-**Parameters**
-
-**sId**: `string`
-
-**oAttributes**: `object`
-
-**aChildNodes**: `array`
+## Class: Node
 
 
-
-### parentNode(oParentNode) 
+**sId**: `string` , The id of the node
+**oAttributes**: `object` , Attributes of the node (useful to store informations like the name of the node or anything else not related to the tree structure)
+**aChildNodes**: `array` , List of all children of this node
+**oParentNode**: `Node` , Parent of this node
+### Node.parentNode(oParentNode) 
 
 Assign a new parent node if given
 Return the parent node
@@ -29,20 +24,10 @@ Return the parent node
 
 **Returns**: `Node`
 
-
-### append(oNode) 
-
-Alias for appendChild
-Add a node as a child of this node
-
-**Parameters**
-
-**oNode**: `Node`, Alias for appendChild
-Add a node as a child of this node
+### Node.append  - see appendChild() 
 
 
-
-### appendChild(oNode) 
+### Node.appendChild(oNode) 
 
 Add a node as a child of this node
 
@@ -52,21 +37,10 @@ Add a node as a child of this node
 
 **Returns**: `boolean`
 
-
-### remove(oNode) 
-
-Alias for removeChild
-Remove a Node child from this Node
-
-**Parameters**
-
-**oNode**: `Node`, Alias for removeChild
-Remove a Node child from this Node
-
-**Returns**: `boolean`
+### Node.remove  - see removeChild() 
 
 
-### removeChild(oNode) 
+### Node.removeChild(oNode) 
 
 Remove a Node child from this Node
 
@@ -76,8 +50,7 @@ Remove a Node child from this Node
 
 **Returns**: `boolean`
 
-
-### removeFromParent(oNode) 
+### Node.removeFromParent(oNode) 
 
 Remove the Node from its Node parent
 
@@ -87,21 +60,10 @@ Remove the Node from its Node parent
 
 **Returns**: `boolean`
 
-
-### prepend(oNode) 
-
-Alias for prependChild
-Insert a node as the first child of this node
-
-**Parameters**
-
-**oNode**: `Node`, Alias for prependChild
-Insert a node as the first child of this node
-
-**Returns**: `boolean`
+### Node.prepend - see prependChild() 
 
 
-### prependChild(oNode) 
+### Node.prependChild(oNode) 
 
 Insert a node as the first child of this node
 
@@ -111,8 +73,7 @@ Insert a node as the first child of this node
 
 **Returns**: `boolean`
 
-
-### insertAtPosition(oNode, iPosition) 
+### Node.insertAtPosition(oNode, iPosition) 
 
 Insert a node at a position in this node
 If no position is given, push to the end of the list
@@ -126,8 +87,7 @@ If no position is given, push to the end of the list
 
 **Returns**: `boolean`
 
-
-### getElementById(sId) 
+### Node.getElementById(sId) 
 
 Return the node with this id inside the scope of this node (him and child, no parents)
 
@@ -137,8 +97,7 @@ Return the node with this id inside the scope of this node (him and child, no pa
 
 **Returns**: `Node`
 
-
-### insertBefore(oNewNode, oReferenceNode) 
+### Node.insertBefore(oNewNode, oReferenceNode) 
 
 Insert a node just before the ref node among childs of this node
 
@@ -150,8 +109,7 @@ Insert a node just before the ref node among childs of this node
 
 **Returns**: `boolean`
 
-
-### insertAfter(oNewNode, oReferenceNode) 
+### Node.insertAfter(oNewNode, oReferenceNode) 
 
 Insert a node just after the ref node among childs of this node
 
@@ -163,8 +121,7 @@ Insert a node just after the ref node among childs of this node
 
 **Returns**: `boolean`
 
-
-### setAttribute(sAttributeName, oValue) 
+### Node.setAttribute(sAttributeName, oValue) 
 
 **Parameters**
 
@@ -174,8 +131,7 @@ Insert a node just after the ref node among childs of this node
 
 **Returns**: `boolean`
 
-
-### getAttribute(sAttributeName) 
+### Node.getAttribute(sAttributeName) 
 
 **Parameters**
 
@@ -183,30 +139,28 @@ Insert a node just after the ref node among childs of this node
 
 **Returns**: `object`
 
+### Node.getChildren() 
 
-### serialize() 
+Return children of this node
 
-Alias for toJson
+**Returns**: `array`, - array of Node
+
+### Node.serialize   - see toJson() 
+
+
+### Node.toJson() 
+
 Return the node and childs as a JSON (serialized)
 
 **Returns**: `object`
 
-
-### toJson() 
-
-Return the node and childs as a JSON (serialized)
-
-**Returns**: `object`
-
-
-### toString() 
+### Node.toString() 
 
 Return the node and childs as a String (serialized)
 
 **Returns**: `string`
 
-
-### hashcode() 
+### Node.hashcode() 
 
 Return a hashcode of the node and childs
 
