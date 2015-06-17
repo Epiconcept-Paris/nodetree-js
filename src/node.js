@@ -37,6 +37,17 @@ var Node = function( sId, oAttributes, aChildNodes )
 }
 
 /**
+ * Return the identifier of the Node
+ *
+ * @method  getId
+ * @return  {string}
+ */
+Node.prototype.getId = function ()
+{
+    return this.sId
+}
+
+/**
  * Assign a new parent node if given
  * Return the parent node
  *

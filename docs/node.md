@@ -13,6 +13,12 @@
 **oAttributes**: `object` , Attributes of the node (useful to store informations like the name of the node or anything else not related to the tree structure)
 **aChildNodes**: `array` , List of all children of this node
 **oParentNode**: `Node` , Parent of this node
+### Node.getId() 
+
+Return the identifier of the Node
+
+**Returns**: `string`
+
 ### Node.parentNode(oParentNode) 
 
 Assign a new parent node if given
