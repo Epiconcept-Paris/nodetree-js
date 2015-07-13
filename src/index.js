@@ -38,8 +38,10 @@ module.exports = {
     loadFromJson: function( oJson ) {
         var oNode = new Node( oJson.id, oJson.attrs )
 
-        for ( var i = 0; i < oJson.child.length; i++ ) {
-            oNode.append( this.loadFromJson( oJson.child[ i ] ) )
+        if ( oJson.child != undefined && Array.isArray( oJson.child ) ) {
+            for ( var i = 0; i < oJson.child.length; i++ ) {
+                oNode.append( this.loadFromJson( oJson.child[ i ] ) )
+            }
         }
 
         return oNode
