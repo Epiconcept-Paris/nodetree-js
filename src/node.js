@@ -251,9 +251,10 @@ Node.prototype.serialize =
  * Return the node and childs as a JSON (serialized)
  *
  * @method  toJson
+ * @param   {boolean}   bImmediateScope - (facultatif, false by default) restrain the json to the node only (not all its children)
  * @return  {object}
  */
-Node.prototype.toJson = function ()
+Node.prototype.toJson = function ( bImmediateScope )
 {
     var oJson = {
         id: this.sId,
@@ -263,7 +264,11 @@ Node.prototype.toJson = function ()
 
     for ( var i = 0; i < this.aChildNodes.length; i++ ) {
         var oChildNode = this.aChildNodes[ i ]
-        oJson.child.push( oChildNode.toJson() )
+        if ( bImmediateScope == true ) {
+            oJson.child.push( oChildNode.getId() )
+        } else {
+            oJson.child.push( oChildNode.toJson() )
+        }
     }
 
     return oJson
@@ -273,22 +278,24 @@ Node.prototype.toJson = function ()
  * Return the node and childs as a String (serialized)
  *
  * @method  toString
+ * @param   {boolean}   bImmediateScope - (facultatif, false by default) restrain the json to the node only (not all its children)
  * @return  {string}
  */
-Node.prototype.toString = function ()
+Node.prototype.toString = function ( bImmediateScope )
 {
-    return JSON.stringify( this.toJson() )
+    return JSON.stringify( this.toJson( bImmediateScope ) )
 }
 
 /**
  * Return a hashcode of the node and childs
  *
  * @method  hashcode
+ * @param   {boolean}   bImmediateScope - (facultatif, false by default) restrain the hashcode to the node only (not all its children)
  * @return  {Number}
  */
-Node.prototype.hashcode = function ()
+Node.prototype.hashcode = function ( bImmediateScope )
 {
-    var sNodeString = this.toString()
+    var sNodeString = this.toString( bImmediateScope )
     var iHash = 0
     var iStringLength = sNodeString.length
 
