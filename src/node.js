@@ -95,6 +95,7 @@ Node.prototype.removeChild = function ( oNode )
 {
     var iPosition = this.aChildNodes.indexOf( oNode )
     if ( iPosition > -1 ) {
+        oNode.oParentNode = undefined
         this.aChildNodes.splice( iPosition, 1 )
         return true
     }
