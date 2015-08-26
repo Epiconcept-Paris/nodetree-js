@@ -234,6 +234,15 @@ Node.prototype.getAttribute = function ( sAttributeName )
 }
 
 /**
+ * @method  getAttributes
+ * @return  {object}
+ */
+Node.prototype.getAttributes = function ()
+{
+    return this.oAttributes
+}
+
+/**
  * Return children of this node
  *
  * @method  getChildren
