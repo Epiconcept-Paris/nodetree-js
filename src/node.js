@@ -320,4 +320,31 @@ Node.prototype.hashcode = function ( bImmediateScope )
     return iHash
 }
 
+/**
+ * Search and return the first parent node who match the attributes given
+ *
+ * @method  getParentNodeByAttributes
+ * @param   {object}    oAttributes - { myAttribute: 'theValueWanted', mySecondAttribute: 'anotherOne' }
+ * @return  {Node}
+ */
+Node.prototype.getParentNodeByAttributes = function( oAttributes )
+{
+    var oParentNode = this.parentNode()
+    if ( oParentNode == undefined ) {
+        return undefined
+    }
+
+    // check attributes
+    for ( var sAttributeName in oAttributes ) {
+        if ( oAttributes.hasOwnProperty( sAttributeName ) ) {
+            if ( oParentNode.getAttribute( sAttributeName ) != oAttributes[ sAttributeName ] ) {
+                return oParentNode.getParentNodeByAttributes( oAttributes )
+            }
+        }
+    }
+
+    // attributes matches
+    return oParentNode
+}
+
 module.exports = Node
