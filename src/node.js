@@ -347,4 +347,26 @@ Node.prototype.getParentNodeByAttributes = function( oAttributes )
     return oParentNode
 }
 
+/**
+ * Search and return the first parent node with the right id
+ *
+ * @method  getParentNodeById
+ * @param   {string}    sNodeId
+ * @return  {Node}
+ */
+Node.prototype.getParentNodeById = function( sNodeId )
+{
+    var oParentNode = this.parentNode()
+    if ( oParentNode == undefined ) {
+        return undefined
+    }
+
+    if ( oParentNode.getId() != sNodeId ) {
+        return oParentNode.getParentNodeById( sNodeId )
+    }
+
+    // attributes matches
+    return oParentNode
+}
+
 module.exports = Node
