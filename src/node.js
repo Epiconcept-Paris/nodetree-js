@@ -186,6 +186,41 @@ Node.prototype.getElementById = function ( sId )
 }
 
 /**
+ * Search and return childrens who match the attributes given
+ *
+ * @method  getElementsByAttributes
+ * @param   {object}    oAttributes - { myAttribute: 'theValueWanted', mySecondAttribute: 'anotherOne' }
+ * @return  {array}
+ */
+Node.prototype.getElementsByAttributes = function( oAttributes )
+{
+    var aOutput = []
+
+    var bMatch = true
+    // check attributes for this node
+    for ( var sAttributeName in oAttributes ) {
+        if ( bMatch == true && oAttributes.hasOwnProperty( sAttributeName ) ) {
+            if ( this.getAttribute( sAttributeName ) != oAttributes[ sAttributeName ] ) {
+                bMatch = false
+            }
+        }
+    }
+
+    if ( bMatch == true ) {
+        aOutput.push( this )
+    }
+
+    for ( var i = 0; i < this.aChildNodes.length; i++ ) {
+        var oChildNode = this.aChildNodes[ i ]
+        if ( oChildNode != undefined ) {
+            aOutput = aOutput.concat( oChildNode.getElementsByAttributes( oAttributes ) )
+        }
+    }
+
+    return aOutput
+}
+
+/**
  * Insert a node just before the ref node among childs of this node
  *
  * @method  insertBefore
