@@ -307,14 +307,11 @@ Node.prototype.toJson = function ( bImmediateScope )
         child: []
     }
 
-    for ( var i = 0; i < this.aChildNodes.length; i++ ) {
-        var oChildNode = this.aChildNodes[ i ]
-        if ( bImmediateScope == true ) {
-            oJson.child.push( oChildNode.getId() )
-        } else {
-            oJson.child.push( oChildNode.toJson() )
-        }
-    }
+    this.getChildren().forEach(function( oChildNode ) {
+        oJson.child.push(
+            ( bImmediateScope == true ) ? oChildNode.getId() : oChildNode.toJson( bImmediateScope )
+        )
+    })
 
     return oJson
 }
@@ -402,6 +399,26 @@ Node.prototype.getParentNodeById = function( sNodeId )
 
     // attributes matches
     return oParentNode
+}
+
+Node.prototype.destroy = function()
+{
+    if ( this._deleted != true ) {
+        this._deleted = true
+        this.removeFromParent()
+
+        delete this.sId
+        for (var variable in this.oAttributes) {
+            if (this.oAttributes.hasOwnProperty(variable)) {
+                delete this.oAttributes[ variable ]
+            }
+        }
+        delete this.oAttributes
+        this.aChildNodes.forEach(function( oChildNode ) {
+            oChildNode.destroy()
+        })
+        delete this.aChildNodes
+    }
 }
 
 module.exports = Node
