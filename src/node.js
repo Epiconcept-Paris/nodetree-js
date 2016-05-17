@@ -219,7 +219,7 @@ Node.prototype.getElementsByAttributes = function (oAttributes) {
  * @return  {boolean}
  */
 Node.prototype.insertBefore = function (oNewNode, oReferenceNode) {
-	return this.insertAtPosition(oNewNode, this.aChildNodes.indexOf(oReferenceNode));
+	return this.insertAtPosition(oNewNode, this.getChildren().indexOf(oReferenceNode));
 };
 
 /**
@@ -231,7 +231,7 @@ Node.prototype.insertBefore = function (oNewNode, oReferenceNode) {
  * @return  {boolean}
  */
 Node.prototype.insertAfter = function (oNewNode, oReferenceNode) {
-	return this.insertAtPosition(oNewNode, this.aChildNodes.indexOf(oReferenceNode) + 1);
+	return this.insertAtPosition(oNewNode, this.getChildren().indexOf(oReferenceNode) + 1);
 };
 
 /**
@@ -269,7 +269,7 @@ Node.prototype.getAttributes = function () {
  * @return  {array} - array of Node
  */
 Node.prototype.getChildren = function () {
-	return this.aChildNodes;
+	return this.aChildNodes || [];
 };
 
 /**
