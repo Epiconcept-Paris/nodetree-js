@@ -251,7 +251,7 @@ Node.prototype.setAttribute = function (sAttributeName, oValue) {
  * @return  {object}
  */
 Node.prototype.getAttribute = function (sAttributeName) {
-	return this.oAttributes[sAttributeName];
+	return this.getAttributes()[sAttributeName];
 };
 
 /**
@@ -259,7 +259,7 @@ Node.prototype.getAttribute = function (sAttributeName) {
  * @return  {object}
  */
 Node.prototype.getAttributes = function () {
-	return this.oAttributes;
+	return this.oAttributes || {};
 };
 
 /**
