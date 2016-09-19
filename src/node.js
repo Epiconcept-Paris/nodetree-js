@@ -92,7 +92,7 @@ export default class Node {
 	 * @return  {boolean}
 	 */
 	removeChild(oNode) {
-		var iPosition = this.aChildNodes.indexOf(oNode);
+		const iPosition = this.aChildNodes.indexOf(oNode);
 		if (iPosition > -1) {
 			oNode.oParentNode = undefined;
 			this.aChildNodes.splice(iPosition, 1);
@@ -366,7 +366,7 @@ export default class Node {
 	 * @return  {Node}
 	 */
 	getParentNodeById(sNodeId) {
-		var oParentNode = this.parentNode();
+		const oParentNode = this.parentNode();
 		if (oParentNode === undefined) {
 			return undefined;
 		}
@@ -375,26 +375,25 @@ export default class Node {
 			return oParentNode.getParentNodeById(sNodeId);
 		}
 
-	// attributes matches
+		// attributes matches
 		return oParentNode;
 	}
 
 	destroy() {
-		if (this._deleted !== true) {
-			this._deleted = true;
-			this.removeFromParent();
-
-			delete this.sId;
-			for (var variable in this.oAttributes) {
-				if (this.oAttributes.hasOwnProperty(variable)) {
-					delete this.oAttributes[variable];
-				}
-			}
-			delete this.oAttributes;
-			this.aChildNodes.forEach(function (oChildNode) {
-				oChildNode.destroy();
-			});
-			delete this.aChildNodes;
+		if (this._deleted === true) {
+			return;
 		}
+		this._deleted = true;
+		this.removeFromParent();
+
+		delete this.sId;
+		for (const variable in this.oAttributes) {
+			if (this.oAttributes.hasOwnProperty(variable)) {
+				delete this.oAttributes[variable];
+			}
+		}
+		delete this.oAttributes;
+		this.aChildNodes.forEach(oChildNode => oChildNode.destroy());
+		delete this.aChildNodes;
 	}
 }
