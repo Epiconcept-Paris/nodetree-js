@@ -144,8 +144,18 @@ export default class Node {
 	 */
 	insertAtPosition(oNode, iPosition) {
 		if ((oNode instanceof Node) === false) {
-			errorLog(new Error('Can\'t append this object. Wrong type, we are supposed to only have Node.'));
-			return false;
+			if (typeof oNode === 'object') {
+				const oJson = oNode;
+				oNode = new Node(oJson.id, oJson.attrs);
+				if (Array.isArray(oJson.child)) {
+					oJson.child.forEach(oChild => {
+						oNode.append(oChild);
+					});
+				}
+			} else {
+				errorLog(new Error('Can\'t append this object. Wrong type, we are supposed to only have Node.'));
+				return false;
+			}
 		}
 
 		if (iPosition === undefined || iPosition < 0 || iPosition > this.aChildNodes.length) {
