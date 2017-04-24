@@ -342,6 +342,45 @@ export default class Node {
 		return iHash;
 	}
 
+	hashcode2(bImmediateScope) {
+		const sNodeString = this.toString(bImmediateScope);
+		const iStringLength = sNodeString.length;
+
+		let iHash = 5381;
+		let index = -1;
+
+		while (++index < iStringLength) {
+			iHash = ((iHash << 5) + iHash) + sNodeString.charCodeAt(index);
+		}
+
+		return iHash >>> 0;
+	}
+
+	hashcode3(bImmediateScope) {
+		const sNodeString = this.toString(bImmediateScope);
+
+		let iHash = 5381;
+		let iStringLength = sNodeString.length;
+
+		while (iStringLength) {
+			iHash = (iHash * 33) ^ sNodeString.charCodeAt(--iStringLength);
+		}
+
+		return iHash >>> 0;
+	}
+
+	hashcode4(bImmediateScope) {
+		const sNodeString = this.toString(bImmediateScope);
+
+		let iHash = 0;
+		let sChar;
+		for (let i = sNodeString.length; i-- > 0;) {
+			// sChar = sNodeString.charCodeAt(i);
+			iHash = ((iHash << 5) + iHash) ^ sNodeString.charCodeAt(i); /* hash * 33 ^ c */
+		}
+		return iHash;
+	}
+
 	/**
 	 * Search and return the first parent node who match the attributes given
 	 *

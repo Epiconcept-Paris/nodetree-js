@@ -1,6 +1,7 @@
 import {describe, it} from 'mocha';
 import {expect} from 'chai';
 
+import Nodetree from '../lib';
 import Node from '../lib/node';
 
 const expectToNotBeUndefined = oItem => {
@@ -244,5 +245,39 @@ describe('attribute', () => {
 	it('should be possible to retrieve the value of an attribute', () => {
 		const sValueAttribute = oNode.getAttribute('attribute2');
 		expect(sValueAttribute).to.be.equal('value_2');
+	});
+});
+
+const doTheBench = (sName, fBench, iLoop) => {
+	const iStart = Date.now();
+	for (let i = 0; i < iLoop; i++) {
+		fBench();
+	}
+	const iTotal = Date.now() - iStart;
+	const iAverage = iTotal / iLoop;
+	console.log(`${sName}: time elapsed: ${iTotal}, average ${iAverage} ms`);
+	return iAverage;
+};
+
+describe('benchmark', () => {
+	const oDemoStructure = require('./test-structure.json');
+	const oNode = Nodetree.loadFromJson(oDemoStructure);
+	const iLoop = 100;
+
+	it('should bench', () => {
+		doTheBench('toString', () => oNode.toString(), iLoop);
+
+		const aBenchResult = [
+			doTheBench('hashcode', () => oNode.hashcode(), iLoop),
+			doTheBench('hashcode2', () => oNode.hashcode2(), iLoop),
+			doTheBench('hashcode3', () => oNode.hashcode3(), iLoop),
+			doTheBench('hashcode4', () => oNode.hashcode4(), iLoop)
+		]
+		.sort();
+
+		console.log(`Fastest: ${aBenchResult[0]}ms, Slowest: ${aBenchResult[aBenchResult.length - 1]}ms`);
+		console.log(`Diff: ${aBenchResult[aBenchResult.length - 1] - aBenchResult[0]}ms, ${
+			(100 * (aBenchResult[0] / aBenchResult[aBenchResult.length - 1])).toFixed(2)
+		}% of the slowest`);
 	});
 });
