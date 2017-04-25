@@ -47,3 +47,28 @@ var oNewNodeTree = Nodetree.loadFromString( sSerialized )
 // get a node inside the tree with the id
 oNodeChild_4 = oNewNodeTree.getElementById( 'id_myNode_child_4' )
 ```
+
+### Benchmark hashcode 0.3.0
+With a file tree of 1.100 mo.
+
+#### 0.2.0
+```
+Building Tree: classic version, time elapsed: 4ms
+toJson, loop: 100: time elapsed: 337ms, average 3.37 ms
+toString(code: JSON.stringify(toJson)), loop: 100: time elapsed: 699ms, average 6.99 ms
+legacyHashcode, loop: 100: time elapsed: 1669ms, average 16.69 ms
+hashcode, loop: 100: time elapsed: 1152ms, average 11.52 ms
+Hashcode without the toString, new hashcode: 4.53ms, legacy: 9.70ms
+Diff hashcode: 5.17ms, 53.3% faster
+```
+
+#### 0.3.0
+```
+Building Tree: cached version, time elapsed: 11ms
+toJson, loop: 100: time elapsed: 0ms, average 0.00 ms
+toString(code: JSON.stringify(toJson)), loop: 100: time elapsed: 430ms, average 4.30 ms
+legacyHashcode, loop: 100: time elapsed: 1291ms, average 12.91 ms
+hashcode, loop: 100: time elapsed: 834ms, average 8.34 ms
+Hashcode without the toString, new hashcode: 4.04ms, legacy: 8.61ms
+Diff hashcode: 4.57ms, 53.08% faster
+```

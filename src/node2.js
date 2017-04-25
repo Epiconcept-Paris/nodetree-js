@@ -1,13 +1,17 @@
 import {uniqId, error_log as errorLog} from './utils';
 
+import CachedNode from './cached';
+
 /**
  * @class  Node
  * @param   {string}sId
  * @param   {object}oAttributes
  * @param   {array} aChildNodes
  */
-export default class Node {
+export default class Node extends CachedNode {
 	constructor(sId = uniqId(), oAttributes = {}, aChildNodes = []) {
+		super(sId, oAttributes, aChildNodes);
+
 		/**
 		 * @member  {string}sId - The id of the node
 		 */
@@ -93,12 +97,14 @@ export default class Node {
 	 */
 	removeChild(oNode) {
 		const iPosition = this.aChildNodes.indexOf(oNode);
-		if (iPosition > -1) {
-			oNode.oParentNode = undefined;
-			this.aChildNodes.splice(iPosition, 1);
-			return true;
+		if (iPosition === -1) {
+			return false;
 		}
-		return false;
+		oNode.oParentNode = undefined;
+		this.aChildNodes.splice(iPosition, 1);
+		super.removeChild(iPosition);
+
+		return true;
 	}
 
 	/**
@@ -165,6 +171,8 @@ export default class Node {
 		this.aChildNodes.splice(iPosition, 0, oNode);
 		// assign the parent node
 		oNode.parentNode(this);
+
+		super.insertAtPosition(oNode, iPosition);
 
 		return true;
 	}
@@ -250,6 +258,8 @@ export default class Node {
 	 * @return  {boolean}
 	 */
 	setAttribute(sAttributeName, oValue) {
+		super.setAttribute(sAttributeName, oValue);
+
 		this.oAttributes[sAttributeName] = oValue;
 		return true;
 	}
@@ -296,13 +306,7 @@ export default class Node {
 	 * @return  {object}
 	 */
 	toJson(bImmediateScope) {
-		return {
-			id: this.sId,
-			attrs: Object.assign({}, this.oAttributes),
-			child: this.getChildren().map(oChildNode => {
-				return (bImmediateScope === true) ? oChildNode.getId() : oChildNode.toJson(bImmediateScope);
-			})
-		};
+		return super.toJson(bImmediateScope);
 	}
 
 	/**
@@ -411,6 +415,9 @@ export default class Node {
 		if (this._deleted === true) {
 			return;
 		}
+
+		super.destroy();
+
 		this._deleted = true;
 		this.removeFromParent();
 

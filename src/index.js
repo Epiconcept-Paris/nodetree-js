@@ -1,4 +1,5 @@
 import Node from './node';
+import Node2 from './node2';
 
 export default {
 
@@ -11,7 +12,10 @@ export default {
 	 * @param   {array}   aChildNodes
 	 * @return  {Node}
 	 */
-	createNode(sId, oAttributes, aChildNodes) {
+	createNode(sId, oAttributes, aChildNodes, bCachedVersion = true) {
+		if (bCachedVersion) {
+			return new Node2(sId, oAttributes, aChildNodes);
+		}
 		return new Node(sId, oAttributes, aChildNodes);
 	},
 
@@ -22,9 +26,9 @@ export default {
 	 * @param   {string}	   sJson
 	 * @return  {Node}
 	 */
-	loadFromString(sJson) {
+	loadFromString(sJson, bCachedVersion) {
 		const oJson = JSON.parse(sJson);
-		return this.loadFromJson(oJson);
+		return this.loadFromJson(oJson, bCachedVersion);
 	},
 
 	/**
@@ -34,20 +38,20 @@ export default {
 	 * @param   {object}	 oJson
 	 * @return  {Node}
 	 */
-	loadFromJson(oJson) {
-		const oNode = new Node(oJson.id, oJson.attrs);
+	loadFromJson(oJson, bCachedVersion = true) {
+		const oNode = bCachedVersion ? new Node2(oJson.id, oJson.attrs) : new Node(oJson.id, oJson.attrs);
 
 		if (Array.isArray(oJson.child)) {
 			oJson.child.forEach(oChild => {
-				oNode.append(this.loadFromJson(oChild));
+				oNode.append(this.loadFromJson(oChild, bCachedVersion));
 			});
 		}
 
 		return oNode;
 	},
 
-	clone(oNode) {
-		const oNewNode = new Node();
+	clone(oNode, bCachedVersion = true) {
+		const oNewNode = bCachedVersion ? new Node2() : new Node();
 		if (oNode === undefined) {
 			return oNewNode;
 		}
@@ -59,7 +63,7 @@ export default {
 		oNode.getChildren()
 		.forEach(oChild => {
 			oNewNode.append(
-				this.clone(oChild)
+				this.clone(oChild, bCachedVersion)
 			);
 		});
 		return oNewNode;
