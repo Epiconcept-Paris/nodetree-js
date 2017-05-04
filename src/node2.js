@@ -185,20 +185,22 @@ export default class Node extends CachedNode {
 	 * @return  {Node}
 	 */
 	getElementById(sId) {
-		if (this.sId === sId) {
-			return this;
-		}
+		let oFound;
+		const aVisitStack = [this];
+		while (aVisitStack.length !== 0 && oFound === undefined) {
+			const oCurrent = aVisitStack[0];
+			if (oCurrent.getId() === sId) {
+				oFound = this;
+			}
 
-		for (let i = 0; i < this.aChildNodes.length; i++) {
-			const oChildNode = this.aChildNodes[i];
-			const oSearchedNode = oChildNode.getElementById(sId);
-			if (oSearchedNode !== undefined) {
-				return oSearchedNode;
+			aVisitStack.shift();
+			const aChilds = oCurrent.getChildren();
+			for (let i = 0; i < aChilds.length; i++) {
+				aVisitStack.push(aChilds[i]);
 			}
 		}
 
-		// there is no element with this id (at least when searching from this node)
-		return undefined;
+		return oFound;
 	}
 
 	/**
@@ -210,19 +212,23 @@ export default class Node extends CachedNode {
 	 */
 	getElementsByAttributes(oAttributes) {
 		const aOutput = [];
+		const aVisitStack = [this];
+		while (aVisitStack.length !== 0) {
+			const oCurrent = aVisitStack[0];
 
-		// check attributes for this node
-		const bMatch = undefined === Object.keys(oAttributes)
-		.find(sAttributeName => this.getAttribute(sAttributeName) !== oAttributes[sAttributeName]);
+			// check attributes for this node
+			const bMatch = undefined === Object.keys(oAttributes)
+			.find(sAttributeName => oCurrent.getAttribute(sAttributeName) !== oAttributes[sAttributeName]);
+			if (bMatch === true) {
+				aOutput.push(oCurrent);
+			}
 
-		if (bMatch === true) {
-			aOutput.push(this);
+			aVisitStack.shift();
+			const aChilds = oCurrent.getChildren();
+			for (let i = 0; i < aChilds.length; i++) {
+				aVisitStack.push(aChilds[i]);
+			}
 		}
-
-		this.aChildNodes
-		.filter(oChild => oChild !== undefined)
-		.map(oChild => oChild.getElementsByAttributes(oAttributes))
-		.forEach(aChilds => aOutput.push(...aChilds));
 
 		return aOutput;
 	}
@@ -371,23 +377,28 @@ export default class Node extends CachedNode {
 	 * @param   {object}oAttributes - { myAttribute: 'theValueWanted', mySecondAttribute: 'anotherOne' }
 	 * @return  {Node}
 	 */
-	getParentNodeByAttributes(oAttributes) {
-		const oParentNode = this.parentNode();
-		if (oParentNode === undefined) {
-			return undefined;
-		}
-
-		// check attributes
-		for (const sAttributeName in oAttributes) {
-			if (oAttributes.hasOwnProperty(sAttributeName)) {
-				if (oParentNode.getAttribute(sAttributeName) !== oAttributes[sAttributeName]) {
-					return oParentNode.getParentNodeByAttributes(oAttributes);
+	getParentNodeByAttributes(oAttributes = {}) {
+		const aAttributesNames = Object.keys(oAttributes);
+		let oNextParent = this.parentNode();
+		while (oNextParent !== undefined) {
+			// check attributes
+			let bValidCurrent = true;
+			for (let i = 0; i < aAttributesNames.length; i++) {
+				const sAttributeName = aAttributesNames[i];
+				if (oNextParent.getAttribute(sAttributeName) !== oAttributes[sAttributeName]) {
+					bValidCurrent = false;
 				}
 			}
+
+			if (bValidCurrent === true) {
+				return oNextParent;
+			}
+
+			// next
+			oNextParent = oNextParent.parentNode();
 		}
 
-		// attributes matches
-		return oParentNode;
+		return undefined;
 	}
 
 	/**
@@ -398,17 +409,17 @@ export default class Node extends CachedNode {
 	 * @return  {Node}
 	 */
 	getParentNodeById(sNodeId) {
-		const oParentNode = this.parentNode();
-		if (oParentNode === undefined) {
-			return undefined;
+		let oNextParent = this.parentNode();
+		while (oNextParent !== undefined) {
+			if (oNextParent.getId() === sNodeId) {
+				return oNextParent;
+			}
+
+			// next
+			oNextParent = oNextParent.parentNode();
 		}
 
-		if (oParentNode.getId() !== sNodeId) {
-			return oParentNode.getParentNodeById(sNodeId);
-		}
-
-		// attributes matches
-		return oParentNode;
+		return undefined;
 	}
 
 	destroy() {
@@ -422,10 +433,10 @@ export default class Node extends CachedNode {
 		this.removeFromParent();
 
 		delete this.sId;
-		for (const variable in this.oAttributes) {
-			if (this.oAttributes.hasOwnProperty(variable)) {
-				delete this.oAttributes[variable];
-			}
+		const aAttributesNames = Object.keys(this.oAttributes);
+		for (let i = 0; i < aAttributesNames.length; i++) {
+			const sAttributeName = aAttributesNames[i];
+			delete this.oAttributes[sAttributeName];
 		}
 		delete this.oAttributes;
 		this.aChildNodes.forEach(oChildNode => oChildNode.destroy());

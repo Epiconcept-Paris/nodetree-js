@@ -28,7 +28,12 @@ export default class CachedNode {
 	}
 
 	removeChild(iPosition) {
-		this._oCachedJson.child.splice(iPosition, 1);
+		if (this._oCachedJson !== 'object' || this._oCachedJson === null) {
+			return;
+		}
+		if (Array.isArray(this._oCachedJson.child)) {
+			this._oCachedJson.child.splice(iPosition, 1);
+		}
 	}
 
 	/**

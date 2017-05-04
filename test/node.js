@@ -249,6 +249,25 @@ describe('attribute', () => {
 	});
 });
 
+describe('benchmark', () => {
+	const iBench = 1000000;
+
+	it(`should support a heavy tree for searching`, done => {
+		const oFirstNode = Nodetree.createNode();
+		let oPreviousNode = oFirstNode;
+
+		for (let i = 0; i < iBench; i++) {
+			const oNewNode = Nodetree.createNode();
+			oPreviousNode.append(oNewNode);
+			oPreviousNode = oNewNode;
+		}
+
+		console.log(oFirstNode.getElementsByAttributes({name: 'toto'}).length);
+
+		done();
+	});
+});
+
 // const doTheBench = (sName, fBench, iLoop) => {
 // 	const iStart = Date.now();
 // 	for (let i = 0; i < iLoop; i++) {
