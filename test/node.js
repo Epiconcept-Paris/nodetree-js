@@ -262,6 +262,8 @@ describe('benchmark', () => {
 			oPreviousNode = oNewNode;
 		}
 
+		oPreviousNode.setAttribute('name', 'toto');
+
 		console.log(oFirstNode.getElementsByAttributes({name: 'toto'}).length);
 
 		done();
