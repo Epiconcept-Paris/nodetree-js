@@ -28,7 +28,7 @@ export default class CachedNode {
 	}
 
 	removeChild(iPosition) {
-		if (this._oCachedJson !== 'object' || this._oCachedJson === null) {
+		if (typeof this._oCachedJson !== 'object' || this._oCachedJson === null) {
 			return;
 		}
 		if (Array.isArray(this._oCachedJson.child)) {
@@ -57,7 +57,7 @@ export default class CachedNode {
 		return Object.assign({}, this._oCachedJson);
 	}
 
-	destroy() {
+	superDestroy() {
 		this._oCachedJson = undefined;
 	}
 }

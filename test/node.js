@@ -252,19 +252,24 @@ describe('attribute', () => {
 describe('benchmark', () => {
 	const iBench = 1000000;
 
+	const oFirstNode = Nodetree.createNode();
+	let oPreviousNode = oFirstNode;
+
+	for (let i = 0; i < iBench; i++) {
+		const oNewNode = Nodetree.createNode();
+		oPreviousNode.append(oNewNode);
+		oPreviousNode = oNewNode;
+	}
+
+	oPreviousNode.setAttribute('name', 'toto');
+
 	it(`should support a heavy tree for searching`, done => {
-		const oFirstNode = Nodetree.createNode();
-		let oPreviousNode = oFirstNode;
 
-		for (let i = 0; i < iBench; i++) {
-			const oNewNode = Nodetree.createNode();
-			oPreviousNode.append(oNewNode);
-			oPreviousNode = oNewNode;
-		}
-
-		oPreviousNode.setAttribute('name', 'toto');
+		const iStart = Date.now();
 
 		console.log(oFirstNode.getElementsByAttributes({name: 'toto'}).length);
+
+		console.log(Date.now() - iStart);
 
 		done();
 	});

@@ -115,8 +115,8 @@ export default class Node extends CachedNode {
 	 * @return  {boolean}
 	 */
 	removeFromParent() {
-		if (this.parentNode() !== undefined) {
-			return this.parentNode().removeChild(this);
+		if (this.oParentNode !== undefined) {
+			return this.oParentNode.removeChild(this);
 		}
 		return false;
 	}
@@ -190,7 +190,7 @@ export default class Node extends CachedNode {
 		while (aVisitStack.length !== 0 && oFound === undefined) {
 			const oCurrent = aVisitStack[0];
 			if (oCurrent.getId() === sId) {
-				oFound = this;
+				oFound = oCurrent;
 			}
 
 			aVisitStack.shift();
@@ -423,23 +423,35 @@ export default class Node extends CachedNode {
 	}
 
 	destroy() {
-		if (this._deleted === true) {
-			return;
+		const aVisitStack = [this];
+		while (aVisitStack.length !== 0) {
+			const oCurrent = aVisitStack[0];
+
+			aVisitStack.shift();
+			const aChilds = oCurrent.getChildren();
+			for (let i = 0; i < aChilds.length; i++) {
+				aVisitStack.push(aChilds[i]);
+			}
+
+			if (this._deleted !== true) {
+				oCurrent._deleted = true;
+				oCurrent.removeFromParent();
+
+				oCurrent.oAttributes = undefined;
+				oCurrent.aChildNodes = undefined;
+				oCurrent.oParentNode = undefined;
+
+				// delete oCurrent.sId;
+				// const aAttributesNames = Object.keys(oCurrent.oAttributes);
+				// for (let i = 0; i < aAttributesNames.length; i++) {
+				// 	const sAttributeName = aAttributesNames[i];
+				// 	delete oCurrent.oAttributes[sAttributeName];
+				// }
+				// delete oCurrent.oAttributes;
+				// delete oCurrent.aChildNodes;
+
+				oCurrent.superDestroy();
+			}
 		}
-
-		super.destroy();
-
-		this._deleted = true;
-		this.removeFromParent();
-
-		delete this.sId;
-		const aAttributesNames = Object.keys(this.oAttributes);
-		for (let i = 0; i < aAttributesNames.length; i++) {
-			const sAttributeName = aAttributesNames[i];
-			delete this.oAttributes[sAttributeName];
-		}
-		delete this.oAttributes;
-		this.aChildNodes.forEach(oChildNode => oChildNode.destroy());
-		delete this.aChildNodes;
 	}
 }
