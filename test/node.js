@@ -60,17 +60,30 @@ describe('insert', () => {
 	const oNodeChild2 = new Node('id_child2');
 	const oNodeChild3 = new Node('id_child3');
 
+	const oNodeChild4 = new Node('id_child4');
+	const oNodeChild5 = new Node('id_child5');
+	const oNodeChild6 = new Node('id_child6');
+
 	it('should be possible to insert a node at a position', () => {
 		oNodeParent.insertAtPosition(oNodeChild);
 		oNodeParent.insertAtPosition(oNodeChild2);
 		oNodeParent.insertAtPosition(oNodeChild3, 1);
+
+		oNodeChild3.insertAtPosition(oNodeChild4);
+		oNodeChild3.insertAtPosition(oNodeChild5);
+		oNodeChild4.insertAtPosition(oNodeChild6);
 
 		const oExpectedJson = {
 			id: 'id_parent',
 			attrs: {},
 			child: [
 				{id: 'id_child', attrs: {}, child: []},
-				{id: 'id_child3', attrs: {}, child: []},
+				{id: 'id_child3', attrs: {}, child: [
+					{id: 'id_child4', attrs: {}, child: [
+						{id: 'id_child6', attrs: {}, child: []}
+					]},
+					{id: 'id_child5', attrs: {}, child: []}
+				]},
 				{id: 'id_child2', attrs: {}, child: []}
 			]
 		};
@@ -79,15 +92,20 @@ describe('insert', () => {
 	});
 
 	it('should be possible to insert a node before another one', () => {
-		oNodeParent.insertBefore(new Node('id_child4'), oNodeChild3);
+		oNodeParent.insertBefore(new Node('id_child_insert'), oNodeChild3);
 
 		const oExpectedJson = {
 			id: 'id_parent',
 			attrs: {},
 			child: [
 				{id: 'id_child', attrs: {}, child: []},
-				{id: 'id_child4', attrs: {}, child: []},
-				{id: 'id_child3', attrs: {}, child: []},
+				{id: 'id_child_insert', attrs: {}, child: []},
+				{id: 'id_child3', attrs: {}, child: [
+					{id: 'id_child4', attrs: {}, child: [
+						{id: 'id_child6', attrs: {}, child: []}
+					]},
+					{id: 'id_child5', attrs: {}, child: []}
+				]},
 				{id: 'id_child2', attrs: {}, child: []}
 			]
 		};
@@ -96,21 +114,28 @@ describe('insert', () => {
 	});
 
 	it('should be possible to insert a node after another one', () => {
-		oNodeParent.insertAfter(new Node('id_child5'), oNodeChild3);
+		oNodeParent.insertAfter(new Node('id_child_after'), oNodeChild3);
 
 		const oExpectedJson = {
 			id: 'id_parent',
 			attrs: {},
 			child: [
 				{id: 'id_child', attrs: {}, child: []},
-				{id: 'id_child4', attrs: {}, child: []},
-				{id: 'id_child3', attrs: {}, child: []},
-				{id: 'id_child5', attrs: {}, child: []},
+				{id: 'id_child_insert', attrs: {}, child: []},
+				{id: 'id_child3', attrs: {}, child: [
+					{id: 'id_child4', attrs: {}, child: [
+						{id: 'id_child6', attrs: {}, child: []}
+					]},
+					{id: 'id_child5', attrs: {}, child: []}
+				]},
+				{id: 'id_child_after', attrs: {}, child: []},
 				{id: 'id_child2', attrs: {}, child: []}
 			]
 		};
 
 		expect(oNodeParent.toString()).to.be.equal(JSON.stringify(oExpectedJson));
+
+		expect(oNodeParent.getElementById('id_child6')).to.not.be.an('undefined');
 	});
 });
 
@@ -119,6 +144,7 @@ describe('append', () => {
 	const oNodeParent = new Node('id_parent');
 	const oNodeChild = new Node('id_child');
 	const oNodeChild2 = new Node('id_child2');
+	const oNodeChild3 = new Node('id_child3');
 
 	it('should be possible to append a node', () => {
 		// appendChild
@@ -128,6 +154,9 @@ describe('append', () => {
 		// append
 		oNodeChild.append(oNodeChild2);
 		expect(oNodeParent.toString()).to.be.equal('{"id":"id_parent","attrs":{},"child":[{"id":"id_child","attrs":{},"child":[{"id":"id_child2","attrs":{},"child":[]}]}]}');
+
+		oNodeChild2.append(oNodeChild3);
+		expect(oNodeParent.getElementById('id_child3')).to.not.be.an('undefined');
 	});
 });
 
