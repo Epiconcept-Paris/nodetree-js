@@ -187,7 +187,7 @@ export default class Node extends CachedNode {
 	getElementById(sId) {
 		const aVisitStack = [this];
 		while (aVisitStack.length !== 0) {
-			const oCurrent = aVisitStack.unshift();
+			const oCurrent = aVisitStack.shift();
 			if (oCurrent.getId() === sId) {
 				return oCurrent;
 			}
@@ -213,7 +213,7 @@ export default class Node extends CachedNode {
 		const aOutput = [];
 		const aVisitStack = [this];
 		while (aVisitStack.length !== 0) {
-			const oCurrent = aVisitStack.unshift();
+			const oCurrent = aVisitStack.shift();
 
 			// check attributes for this node
 			let bValidCurrent = true;
@@ -230,7 +230,7 @@ export default class Node extends CachedNode {
 
 			const aChilds = oCurrent.getChildren().reverse();
 			for (let i = 0; i < aChilds.length; i++) {
-				aVisitStack.shift(aChilds[i]);
+				aVisitStack.unshift(aChilds[i]);
 			}
 		}
 
@@ -429,7 +429,7 @@ export default class Node extends CachedNode {
 	destroy() {
 		const aVisitStack = [this];
 		while (aVisitStack.length !== 0) {
-			const oCurrent = aVisitStack.unshift();
+			const oCurrent = aVisitStack.shift();
 
 			const aChilds = oCurrent.getChildren();
 			for (let i = 0; i < aChilds.length; i++) {
