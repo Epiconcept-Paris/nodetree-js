@@ -228,9 +228,9 @@ export default class Node extends CachedNode {
 				aOutput.push(oCurrent);
 			}
 
-			const aChilds = oCurrent.getChildren();
+			const aChilds = oCurrent.getChildren().reverse();
 			for (let i = 0; i < aChilds.length; i++) {
-				aVisitStack.push(aChilds[i]);
+				aVisitStack.shift(aChilds[i]);
 			}
 		}
 
