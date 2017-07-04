@@ -228,7 +228,7 @@ export default class Node extends CachedNode {
 				aOutput.push(oCurrent);
 			}
 
-			const aChilds = oCurrent.getChildren().reverse();
+			const aChilds = oCurrent.getChildren().slice().reverse();
 			for (let i = 0; i < aChilds.length; i++) {
 				aVisitStack.unshift(aChilds[i]);
 			}
