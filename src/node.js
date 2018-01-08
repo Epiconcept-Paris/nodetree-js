@@ -1,13 +1,17 @@
 import {uniqId, error_log as errorLog} from './utils';
 
+import CachedNode from './cached';
+
 /**
  * @class  Node
  * @param   {string}sId
  * @param   {object}oAttributes
  * @param   {array} aChildNodes
  */
-export default class Node {
+export default class Node extends CachedNode {
 	constructor(sId = uniqId(), oAttributes = {}, aChildNodes = []) {
+		super(sId, oAttributes, aChildNodes);
+
 		/**
 		 * @member  {string}sId - The id of the node
 		 */
@@ -93,12 +97,14 @@ export default class Node {
 	 */
 	removeChild(oNode) {
 		const iPosition = this.aChildNodes.indexOf(oNode);
-		if (iPosition > -1) {
-			oNode.oParentNode = undefined;
-			this.aChildNodes.splice(iPosition, 1);
-			return true;
+		if (iPosition === -1) {
+			return false;
 		}
-		return false;
+		oNode.oParentNode = undefined;
+		this.aChildNodes.splice(iPosition, 1);
+		super.removeChild(iPosition);
+
+		return true;
 	}
 
 	/**
@@ -109,8 +115,8 @@ export default class Node {
 	 * @return  {boolean}
 	 */
 	removeFromParent() {
-		if (this.parentNode() !== undefined) {
-			return this.parentNode().removeChild(this);
+		if (this.oParentNode !== undefined) {
+			return this.oParentNode.removeChild(this);
 		}
 		return false;
 	}
@@ -166,6 +172,8 @@ export default class Node {
 		// assign the parent node
 		oNode.parentNode(this);
 
+		super.insertAtPosition(oNode, iPosition);
+
 		return true;
 	}
 
@@ -177,19 +185,19 @@ export default class Node {
 	 * @return  {Node}
 	 */
 	getElementById(sId) {
-		if (this.sId === sId) {
-			return this;
-		}
+		const aVisitStack = [this];
+		while (aVisitStack.length !== 0) {
+			const oCurrent = aVisitStack.shift();
+			if (oCurrent.getId() === sId) {
+				return oCurrent;
+			}
 
-		for (let i = 0; i < this.aChildNodes.length; i++) {
-			const oChildNode = this.aChildNodes[i];
-			const oSearchedNode = oChildNode.getElementById(sId);
-			if (oSearchedNode !== undefined) {
-				return oSearchedNode;
+			const aChilds = oCurrent.getChildren();
+			for (let i = 0; i < aChilds.length; i++) {
+				aVisitStack.push(aChilds[i]);
 			}
 		}
 
-		// there is no element with this id (at least when searching from this node)
 		return undefined;
 	}
 
@@ -201,20 +209,30 @@ export default class Node {
 	 * @return  {array}
 	 */
 	getElementsByAttributes(oAttributes) {
+		const aAttributesNames = Object.keys(oAttributes);
 		const aOutput = [];
+		const aVisitStack = [this];
+		while (aVisitStack.length !== 0) {
+			const oCurrent = aVisitStack.shift();
 
-		// check attributes for this node
-		const bMatch = undefined === Object.keys(oAttributes)
-		.find(sAttributeName => this.getAttribute(sAttributeName) !== oAttributes[sAttributeName]);
+			// check attributes for this node
+			let bValidCurrent = true;
+			for (let i = 0; i < aAttributesNames.length; i++) {
+				const sAttributeName = aAttributesNames[i];
+				if (oCurrent.getAttribute(sAttributeName) !== oAttributes[sAttributeName]) {
+					bValidCurrent = false;
+				}
+			}
 
-		if (bMatch === true) {
-			aOutput.push(this);
+			if (bValidCurrent === true) {
+				aOutput.push(oCurrent);
+			}
+
+			const aChilds = oCurrent.getChildren().slice().reverse();
+			for (let i = 0; i < aChilds.length; i++) {
+				aVisitStack.unshift(aChilds[i]);
+			}
 		}
-
-		this.aChildNodes
-		.filter(oChild => oChild !== undefined)
-		.map(oChild => oChild.getElementsByAttributes(oAttributes))
-		.forEach(aChilds => aOutput.push(...aChilds));
 
 		return aOutput;
 	}
@@ -250,6 +268,8 @@ export default class Node {
 	 * @return  {boolean}
 	 */
 	setAttribute(sAttributeName, oValue) {
+		super.setAttribute(sAttributeName, oValue);
+
 		this.oAttributes[sAttributeName] = oValue;
 		return true;
 	}
@@ -296,13 +316,7 @@ export default class Node {
 	 * @return  {object}
 	 */
 	toJson(bImmediateScope) {
-		return {
-			id: this.sId,
-			attrs: Object.assign({}, this.oAttributes),
-			child: this.getChildren().map(oChildNode => {
-				return (bImmediateScope === true) ? oChildNode.getId() : oChildNode.toJson(bImmediateScope);
-			})
-		};
+		return super.toJson(bImmediateScope);
 	}
 
 	/**
@@ -318,12 +332,13 @@ export default class Node {
 
 	/**
 	 * Return a hashcode of the node and childs
+	 * legacy version, should not be used
 	 *
-	 * @method  hashcode
+	 * @method  legacyHashcode
 	 * @param   {boolean}   bImmediateScope - (facultatif, false by default) restrain the hashcode to the node only (not all its children)
 	 * @return  {Number}
 	 */
-	hashcode(bImmediateScope) {
+	legacyHashcode(bImmediateScope) {
 		const sNodeString = this.toString(bImmediateScope);
 		let iHash = 0;
 		const iStringLength = sNodeString.length;
@@ -342,40 +357,18 @@ export default class Node {
 		return iHash;
 	}
 
-	hashcode2(bImmediateScope) {
-		const sNodeString = this.toString(bImmediateScope);
-		const iStringLength = sNodeString.length;
-
-		let iHash = 5381;
-		let index = -1;
-
-		while (++index < iStringLength) {
-			iHash = ((iHash << 5) + iHash) + sNodeString.charCodeAt(index);
-		}
-
-		return iHash >>> 0;
-	}
-
-	hashcode3(bImmediateScope) {
-		const sNodeString = this.toString(bImmediateScope);
-
-		let iHash = 5381;
-		let iStringLength = sNodeString.length;
-
-		while (iStringLength) {
-			iHash = (iHash * 33) ^ sNodeString.charCodeAt(--iStringLength);
-		}
-
-		return iHash >>> 0;
-	}
-
-	hashcode4(bImmediateScope) {
+	/**
+	 * Return a hashcode of the node and childs
+	 *
+	 * @method  hashcode
+	 * @param   {boolean}   bImmediateScope - (facultatif, false by default) restrain the hashcode to the node only (not all its children)
+	 * @return  {Number}
+	 */
+	hashcode(bImmediateScope) {
 		const sNodeString = this.toString(bImmediateScope);
 
 		let iHash = 0;
-		let sChar;
 		for (let i = sNodeString.length; i-- > 0;) {
-			// sChar = sNodeString.charCodeAt(i);
 			iHash = ((iHash << 5) + iHash) ^ sNodeString.charCodeAt(i); /* hash * 33 ^ c */
 		}
 		return iHash;
@@ -388,23 +381,28 @@ export default class Node {
 	 * @param   {object}oAttributes - { myAttribute: 'theValueWanted', mySecondAttribute: 'anotherOne' }
 	 * @return  {Node}
 	 */
-	getParentNodeByAttributes(oAttributes) {
-		const oParentNode = this.parentNode();
-		if (oParentNode === undefined) {
-			return undefined;
-		}
-
-		// check attributes
-		for (const sAttributeName in oAttributes) {
-			if (oAttributes.hasOwnProperty(sAttributeName)) {
-				if (oParentNode.getAttribute(sAttributeName) !== oAttributes[sAttributeName]) {
-					return oParentNode.getParentNodeByAttributes(oAttributes);
+	getParentNodeByAttributes(oAttributes = {}) {
+		const aAttributesNames = Object.keys(oAttributes);
+		let oNextParent = this.parentNode();
+		while (oNextParent !== undefined) {
+			// check attributes
+			let bValidCurrent = true;
+			for (let i = 0; i < aAttributesNames.length; i++) {
+				const sAttributeName = aAttributesNames[i];
+				if (oNextParent.getAttribute(sAttributeName) !== oAttributes[sAttributeName]) {
+					bValidCurrent = false;
 				}
 			}
+
+			if (bValidCurrent === true) {
+				return oNextParent;
+			}
+
+			// next
+			oNextParent = oNextParent.parentNode();
 		}
 
-		// attributes matches
-		return oParentNode;
+		return undefined;
 	}
 
 	/**
@@ -415,34 +413,48 @@ export default class Node {
 	 * @return  {Node}
 	 */
 	getParentNodeById(sNodeId) {
-		const oParentNode = this.parentNode();
-		if (oParentNode === undefined) {
-			return undefined;
+		let oNextParent = this.parentNode();
+		while (oNextParent !== undefined) {
+			if (oNextParent.getId() === sNodeId) {
+				return oNextParent;
+			}
+
+			// next
+			oNextParent = oNextParent.parentNode();
 		}
 
-		if (oParentNode.getId() !== sNodeId) {
-			return oParentNode.getParentNodeById(sNodeId);
-		}
-
-		// attributes matches
-		return oParentNode;
+		return undefined;
 	}
 
 	destroy() {
-		if (this._deleted === true) {
-			return;
-		}
-		this._deleted = true;
-		this.removeFromParent();
+		const aVisitStack = [this];
+		while (aVisitStack.length !== 0) {
+			const oCurrent = aVisitStack.shift();
 
-		delete this.sId;
-		for (const variable in this.oAttributes) {
-			if (this.oAttributes.hasOwnProperty(variable)) {
-				delete this.oAttributes[variable];
+			const aChilds = oCurrent.getChildren();
+			for (let i = 0; i < aChilds.length; i++) {
+				aVisitStack.push(aChilds[i]);
+			}
+
+			if (this._deleted !== true) {
+				oCurrent._deleted = true;
+				oCurrent.removeFromParent();
+
+				oCurrent.oAttributes = undefined;
+				oCurrent.aChildNodes = undefined;
+				oCurrent.oParentNode = undefined;
+
+				// delete oCurrent.sId;
+				// const aAttributesNames = Object.keys(oCurrent.oAttributes);
+				// for (let i = 0; i < aAttributesNames.length; i++) {
+				// 	const sAttributeName = aAttributesNames[i];
+				// 	delete oCurrent.oAttributes[sAttributeName];
+				// }
+				// delete oCurrent.oAttributes;
+				// delete oCurrent.aChildNodes;
+
+				oCurrent.superDestroy();
 			}
 		}
-		delete this.oAttributes;
-		this.aChildNodes.forEach(oChildNode => oChildNode.destroy());
-		delete this.aChildNodes;
 	}
 }

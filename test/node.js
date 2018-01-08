@@ -48,7 +48,8 @@ describe('serialize', () => {
 		expect(JSON.stringify(oJsonSerialize)).to.be.equal(JSON.stringify(oExpectedJson));
 	});
 	it('should be possible to generate a hashcode from the node', () => {
-		expect(oNodeParent.hashcode()).to.be.equal(-1918605369);
+		expect(oNodeParent.hashcode()).to.be.equal(1357554261);
+		expect(oNodeParent.legacyHashcode()).to.be.equal(-1918605369);
 	});
 });
 
@@ -59,17 +60,30 @@ describe('insert', () => {
 	const oNodeChild2 = new Node('id_child2');
 	const oNodeChild3 = new Node('id_child3');
 
+	const oNodeChild4 = new Node('id_child4');
+	const oNodeChild5 = new Node('id_child5');
+	const oNodeChild6 = new Node('id_child6');
+
 	it('should be possible to insert a node at a position', () => {
 		oNodeParent.insertAtPosition(oNodeChild);
 		oNodeParent.insertAtPosition(oNodeChild2);
 		oNodeParent.insertAtPosition(oNodeChild3, 1);
+
+		oNodeChild3.insertAtPosition(oNodeChild4);
+		oNodeChild3.insertAtPosition(oNodeChild5);
+		oNodeChild4.insertAtPosition(oNodeChild6);
 
 		const oExpectedJson = {
 			id: 'id_parent',
 			attrs: {},
 			child: [
 				{id: 'id_child', attrs: {}, child: []},
-				{id: 'id_child3', attrs: {}, child: []},
+				{id: 'id_child3', attrs: {}, child: [
+					{id: 'id_child4', attrs: {}, child: [
+						{id: 'id_child6', attrs: {}, child: []}
+					]},
+					{id: 'id_child5', attrs: {}, child: []}
+				]},
 				{id: 'id_child2', attrs: {}, child: []}
 			]
 		};
@@ -78,15 +92,20 @@ describe('insert', () => {
 	});
 
 	it('should be possible to insert a node before another one', () => {
-		oNodeParent.insertBefore(new Node('id_child4'), oNodeChild3);
+		oNodeParent.insertBefore(new Node('id_child_insert'), oNodeChild3);
 
 		const oExpectedJson = {
 			id: 'id_parent',
 			attrs: {},
 			child: [
 				{id: 'id_child', attrs: {}, child: []},
-				{id: 'id_child4', attrs: {}, child: []},
-				{id: 'id_child3', attrs: {}, child: []},
+				{id: 'id_child_insert', attrs: {}, child: []},
+				{id: 'id_child3', attrs: {}, child: [
+					{id: 'id_child4', attrs: {}, child: [
+						{id: 'id_child6', attrs: {}, child: []}
+					]},
+					{id: 'id_child5', attrs: {}, child: []}
+				]},
 				{id: 'id_child2', attrs: {}, child: []}
 			]
 		};
@@ -95,21 +114,28 @@ describe('insert', () => {
 	});
 
 	it('should be possible to insert a node after another one', () => {
-		oNodeParent.insertAfter(new Node('id_child5'), oNodeChild3);
+		oNodeParent.insertAfter(new Node('id_child_after'), oNodeChild3);
 
 		const oExpectedJson = {
 			id: 'id_parent',
 			attrs: {},
 			child: [
 				{id: 'id_child', attrs: {}, child: []},
-				{id: 'id_child4', attrs: {}, child: []},
-				{id: 'id_child3', attrs: {}, child: []},
-				{id: 'id_child5', attrs: {}, child: []},
+				{id: 'id_child_insert', attrs: {}, child: []},
+				{id: 'id_child3', attrs: {}, child: [
+					{id: 'id_child4', attrs: {}, child: [
+						{id: 'id_child6', attrs: {}, child: []}
+					]},
+					{id: 'id_child5', attrs: {}, child: []}
+				]},
+				{id: 'id_child_after', attrs: {}, child: []},
 				{id: 'id_child2', attrs: {}, child: []}
 			]
 		};
 
 		expect(oNodeParent.toString()).to.be.equal(JSON.stringify(oExpectedJson));
+
+		expect(oNodeParent.getElementById('id_child6')).to.not.be.an('undefined');
 	});
 });
 
@@ -118,6 +144,7 @@ describe('append', () => {
 	const oNodeParent = new Node('id_parent');
 	const oNodeChild = new Node('id_child');
 	const oNodeChild2 = new Node('id_child2');
+	const oNodeChild3 = new Node('id_child3');
 
 	it('should be possible to append a node', () => {
 		// appendChild
@@ -127,6 +154,9 @@ describe('append', () => {
 		// append
 		oNodeChild.append(oNodeChild2);
 		expect(oNodeParent.toString()).to.be.equal('{"id":"id_parent","attrs":{},"child":[{"id":"id_child","attrs":{},"child":[{"id":"id_child2","attrs":{},"child":[]}]}]}');
+
+		oNodeChild2.append(oNodeChild3);
+		expect(oNodeParent.getElementById('id_child3')).to.not.be.an('undefined');
 	});
 });
 
@@ -248,36 +278,122 @@ describe('attribute', () => {
 	});
 });
 
-const doTheBench = (sName, fBench, iLoop) => {
-	const iStart = Date.now();
-	for (let i = 0; i < iLoop; i++) {
-		fBench();
-	}
-	const iTotal = Date.now() - iStart;
-	const iAverage = iTotal / iLoop;
-	console.log(`${sName}: time elapsed: ${iTotal}, average ${iAverage} ms`);
-	return iAverage;
-};
-
 describe('benchmark', () => {
-	const oDemoStructure = require('./test-structure.json');
-	const oNode = Nodetree.loadFromJson(oDemoStructure);
-	const iLoop = 100;
+	const iBench = 1000000;
 
-	it('should bench', () => {
-		doTheBench('toString', () => oNode.toString(), iLoop);
+	const oFirstNode = Nodetree.createNode();
+	let oPreviousNode = oFirstNode;
 
-		const aBenchResult = [
-			doTheBench('hashcode', () => oNode.hashcode(), iLoop),
-			doTheBench('hashcode2', () => oNode.hashcode2(), iLoop),
-			doTheBench('hashcode3', () => oNode.hashcode3(), iLoop),
-			doTheBench('hashcode4', () => oNode.hashcode4(), iLoop)
-		]
-		.sort();
+	for (let i = 0; i < iBench; i++) {
+		const oNewNode = Nodetree.createNode();
+		oPreviousNode.append(oNewNode);
+		oPreviousNode = oNewNode;
+	}
 
-		console.log(`Fastest: ${aBenchResult[0]}ms, Slowest: ${aBenchResult[aBenchResult.length - 1]}ms`);
-		console.log(`Diff: ${aBenchResult[aBenchResult.length - 1] - aBenchResult[0]}ms, ${
-			(100 * (aBenchResult[0] / aBenchResult[aBenchResult.length - 1])).toFixed(2)
-		}% of the slowest`);
+	oPreviousNode.setAttribute('name', 'toto');
+
+	it(`should support a heavy tree for searching`, done => {
+
+		const iStart = Date.now();
+
+		console.log(oFirstNode.getElementsByAttributes({name: 'toto'}).length);
+
+		console.log(Date.now() - iStart);
+
+		done();
 	});
 });
+
+// const doTheBench = (sName, fBench, iLoop) => {
+// 	const iStart = Date.now();
+// 	for (let i = 0; i < iLoop; i++) {
+// 		fBench();
+// 	}
+// 	const iTotal = Date.now() - iStart;
+// 	const iAverage = iTotal / iLoop;
+// 	console.log(`${sName}, loop: ${iLoop}: time elapsed: ${iTotal}ms, average ${iAverage.toFixed(2)} ms`);
+// 	return iAverage;
+// };
+//
+// describe('benchmark', () => {
+// 	const oDemoStructure = require('./test-structure.json');
+// 	const iLoop = 100;
+//
+// 	/*
+// 	Building Tree: classic version, time elapsed: 4ms
+// 	toJson, loop: 100: time elapsed: 370ms, average 3.70 ms
+// 	toString(code: JSON.stringify(toJson)), loop: 100: time elapsed: 769ms, average 7.69 ms
+// 	legacyHashcode, loop: 100: time elapsed: 1674ms, average 16.74 ms
+// 	hashcode, loop: 100: time elapsed: 1150ms, average 11.50 ms
+// 	Without the toString, Fastest: 3.81ms, Slowest: 9.05ms
+// 	Diff hashcode: 5.24ms, 57.9% faster
+// 	hash 10889908 legacy hash -1899445872
+// 	    ✓ should bench classic version (3996ms)
+// 	*/
+// 	it('should bench classic version', function () {
+// 		this.timeout(30000);
+//
+// 		const iStartBuild = Date.now();
+// 		const oNode = Nodetree.loadFromJson(oDemoStructure, false);
+// 		console.log(`Building Tree: classic version, time elapsed: ${Date.now() - iStartBuild}ms`);
+//
+// 		doTheBench('toJson', () => oNode.toJson(), iLoop);
+// 		const iToString = doTheBench('toString(code: JSON.stringify(toJson))', () => oNode.toString(), iLoop);
+//
+// 		const aBenchResult = [
+// 			doTheBench('legacyHashcode', () => oNode.legacyHashcode(), iLoop),
+// 			doTheBench('hashcode', () => oNode.hashcode(), iLoop)
+// 		]
+// 		.map(iResult => iResult - iToString)
+// 		.sort();
+//
+// 		console.log(`Without the toString, Fastest: ${aBenchResult[0].toFixed(2)}ms, Slowest: ${aBenchResult[aBenchResult.length - 1].toFixed(2)}ms`);
+// 		console.log(`Diff hashcode: ${(aBenchResult[aBenchResult.length - 1] - aBenchResult[0]).toFixed(2)}ms, ${
+// 			100 - (100 * (aBenchResult[0] / aBenchResult[aBenchResult.length - 1])).toFixed(2)
+// 		}% faster`);
+// 		console.log('hash', oNode.hashcode(), 'legacy hash', oNode.legacyHashcode());
+// 	});
+//
+// 	/*
+// 	Building Tree: cached version, time elapsed: 15ms
+// 	toJson, loop: 100: time elapsed: 0ms, average 0.00 ms
+// 	toString(code: JSON.stringify(toJson)), loop: 100: time elapsed: 432ms, average 4.32 ms
+// 	legacyHashcode, loop: 100: time elapsed: 1283ms, average 12.83 ms
+// 	hashcode, loop: 100: time elapsed: 825ms, average 8.25 ms
+// 	Hashcode without the toString, Fastest: 3.93ms, Slowest: 8.51ms
+// 	Diff hashcode: 4.58ms, 53.82% faster
+// 	hash 10889908 legacy hash -1899445872
+// 	    ✓ should bench cached version (2576ms)
+// 	*/
+// 	it('should bench cached version', function () {
+// 		this.timeout(30000);
+//
+// 		const iStartBuild = Date.now();
+// 		const oNode = Nodetree.loadFromJson(oDemoStructure);
+// 		console.log(`Building Tree: cached version, time elapsed: ${Date.now() - iStartBuild}ms`);
+//
+// 		doTheBench('toJson', () => oNode.toJson(), iLoop);
+// 		const iToString = doTheBench('toString(code: JSON.stringify(toJson))', () => oNode.toString(), iLoop);
+//
+// 		const aBenchResult = [
+// 			doTheBench('legacyHashcode', () => oNode.legacyHashcode(), iLoop),
+// 			doTheBench('hashcode', () => oNode.hashcode(), iLoop)
+// 		]
+// 		.map(iResult => iResult - iToString)
+// 		.sort();
+//
+// 		console.log(`Hashcode without the toString, Fastest: ${aBenchResult[0].toFixed(2)}ms, Slowest: ${aBenchResult[aBenchResult.length - 1].toFixed(2)}ms`);
+// 		console.log(`Diff hashcode: ${(aBenchResult[aBenchResult.length - 1] - aBenchResult[0]).toFixed(2)}ms, ${
+// 			100 - (100 * (aBenchResult[0] / aBenchResult[aBenchResult.length - 1])).toFixed(2)
+// 		}% faster`);
+// 		console.log('hash', oNode.hashcode(), 'legacy hash', oNode.legacyHashcode());
+// 	});
+//
+// 	/*
+// 	Building Tree: cached version, time elapsed: 7ms
+// 	getElementById, loop: 100: time elapsed: 4ms, average 0.04 ms
+// 	getElementById, loop: 100: time elapsed: 5ms, average 0.05 ms
+// 	getElementById, loop: 100: time elapsed: 5ms, average 0.05 ms
+// 	getElementById, loop: 100: time elapsed: 1ms, average 0.01 ms
+// 	*/
+// });

@@ -22,9 +22,9 @@ export default {
 	 * @param   {string}	   sJson
 	 * @return  {Node}
 	 */
-	loadFromString(sJson) {
+	loadFromString(sJson, bCachedVersion) {
 		const oJson = JSON.parse(sJson);
-		return this.loadFromJson(oJson);
+		return this.loadFromJson(oJson, bCachedVersion);
 	},
 
 	/**

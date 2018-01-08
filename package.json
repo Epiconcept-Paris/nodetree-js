@@ -2,7 +2,7 @@
   "author": "Epiconcept-Paris",
   "name": "nodetree-js",
   "description": "Library for node tree building, navigation and serialization",
-  "version": "0.2.0",
+  "version": "0.3.6",
   "repository": {
     "url": ""
   },
