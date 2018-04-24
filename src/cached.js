@@ -45,13 +45,7 @@ export default class CachedNode {
 	 */
 	toJson(bImmediateScope) {
 		if (bImmediateScope) {
-			return Object.assign(
-				{},
-				this._oCachedJson,
-				{
-					child: this.getChildren().map(oChildNode => oChildNode.getId())
-				}
-			);
+			return Object.assign({}, this._oCachedJson, {child: []});
 		}
 
 		return Object.assign({}, this._oCachedJson);

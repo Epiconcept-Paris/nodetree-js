@@ -47,22 +47,11 @@ export default {
 	},
 
 	clone(oNode) {
-		const oNewNode = new Node();
 		if (oNode === undefined) {
-			return oNewNode;
+			return new Node();
 		}
-		const oAttributes = oNode.getAttributes();
-		Object.keys(oAttributes).forEach(sAttributeName => {
-			oNewNode.setAttribute(sAttributeName, oAttributes[sAttributeName]);
-		});
 
-		oNode.getChildren()
-		.forEach(oChild => {
-			oNewNode.append(
-				this.clone(oChild)
-			);
-		});
-		return oNewNode;
+		return this.loadFromString(oNode.toString());
 	}
 
 };
