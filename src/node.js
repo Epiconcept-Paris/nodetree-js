@@ -187,12 +187,14 @@ export default class Node extends CachedNode {
 	getElementById(sId) {
 		const aVisitStack = [this];
 		while (aVisitStack.length !== 0) {
-			const oCurrent = aVisitStack.shift();
+			const oCurrent = aVisitStack.pop();
 			if (oCurrent.getId() === sId) {
 				return oCurrent;
 			}
 
-			const aChilds = oCurrent.getChildren();
+      // for... is faster than
+      // aVisitStack.push(...oCurrent.getChildren());
+      const aChilds = oCurrent.getChildren();
 			for (let i = 0; i < aChilds.length; i++) {
 				aVisitStack.push(aChilds[i]);
 			}
