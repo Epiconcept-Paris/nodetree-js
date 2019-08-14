@@ -294,9 +294,15 @@ describe('benchmark', () => {
 
 	it(`should support a heavy tree for searching`, done => {
 
-		const iStart = Date.now();
+		let iStart = Date.now();
 
 		console.log(oFirstNode.getElementsByAttributes({name: 'toto'}).length);
+
+    console.log(Date.now() - iStart);
+
+    iStart = Date.now();
+
+		oFirstNode.getElementById(oPreviousNode.getId());
 
 		console.log(Date.now() - iStart);
 

@@ -195,7 +195,7 @@ export default class Node extends CachedNode {
       // for... is faster than
       // aVisitStack.push(...oCurrent.getChildren());
       const aChilds = oCurrent.getChildren();
-      for (let i = aChilds.length - 1; i > -1; i--) {
+      for (let i = 0; i < aChilds.length; i++) {
         aVisitStack.push(aChilds[i]);
       }
 		}
