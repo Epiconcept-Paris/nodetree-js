@@ -190,14 +190,14 @@ export default class Node extends CachedNode {
 			const oCurrent = aVisitStack.pop();
 			if (oCurrent.getId() === sId) {
 				return oCurrent;
-			}
+      }
 
       // for... is faster than
       // aVisitStack.push(...oCurrent.getChildren());
       const aChilds = oCurrent.getChildren();
-			for (let i = 0; i < aChilds.length; i++) {
-				aVisitStack.push(aChilds[i]);
-			}
+      for (let i = aChilds.length - 1; i > -1; i--) {
+        aVisitStack.push(aChilds[i]);
+      }
 		}
 
 		return undefined;
@@ -215,14 +215,15 @@ export default class Node extends CachedNode {
 		const aOutput = [];
 		const aVisitStack = [this];
 		while (aVisitStack.length !== 0) {
-			const oCurrent = aVisitStack.shift();
+			const oCurrent = aVisitStack.pop();
 
 			// check attributes for this node
 			let bValidCurrent = true;
 			for (let i = 0; i < aAttributesNames.length; i++) {
 				const sAttributeName = aAttributesNames[i];
 				if (oCurrent.getAttribute(sAttributeName) !== oAttributes[sAttributeName]) {
-					bValidCurrent = false;
+          bValidCurrent = false;
+          break;
 				}
 			}
 
@@ -230,10 +231,12 @@ export default class Node extends CachedNode {
 				aOutput.push(oCurrent);
 			}
 
-			const aChilds = oCurrent.getChildren().slice().reverse();
-			for (let i = 0; i < aChilds.length; i++) {
-				aVisitStack.unshift(aChilds[i]);
-			}
+			// for... is faster than
+      // aVisitStack.push(...oCurrent.getChildren());
+      const aChilds = oCurrent.getChildren();
+      for (let i = aChilds.length - 1; i > -1; i--) {
+        aVisitStack.push(aChilds[i]);
+      }
 		}
 
 		return aOutput;
@@ -431,12 +434,14 @@ export default class Node extends CachedNode {
 	destroy() {
 		const aVisitStack = [this];
 		while (aVisitStack.length !== 0) {
-			const oCurrent = aVisitStack.shift();
+			const oCurrent = aVisitStack.pop();
 
-			const aChilds = oCurrent.getChildren();
-			for (let i = 0; i < aChilds.length; i++) {
-				aVisitStack.push(aChilds[i]);
-			}
+      // for... is faster than
+      // aVisitStack.push(...oCurrent.getChildren());
+      const aChilds = oCurrent.getChildren();
+      for (let i = aChilds.length - 1; i > -1; i--) {
+        aVisitStack.push(aChilds[i]);
+      }
 
 			if (this._deleted !== true) {
 				oCurrent._deleted = true;
