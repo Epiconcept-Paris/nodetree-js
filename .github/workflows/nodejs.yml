@@ -33,3 +33,5 @@ jobs:
 
     - name: publish to npm registry
       run: npm publish
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
