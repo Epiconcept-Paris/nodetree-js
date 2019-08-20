@@ -4,7 +4,7 @@ on:
   push:
     branches:
     - master
-    
+
 jobs:
   build:
 
@@ -16,17 +16,20 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    
+
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-        
+
     - name: npm install
       run: npm install
-      
+
     - name: build
       run: npm run build
-      
+
     - name: test
       run: npm test
+
+    - name: publish to npm registry
+      run: npm publish
