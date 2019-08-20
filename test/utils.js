@@ -1,7 +1,7 @@
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
 
-import Utils from '../src/utils';
+import Utils from '../lib/utils';
 
 describe('uniqId', () => {
   it('should be possible to create an unique identifier', () => {

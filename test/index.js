@@ -1,7 +1,7 @@
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
 
-import Nodetree from '../src';
+import Nodetree from '../lib';
 
 const expectToNotBeUndefined = oItem => expect(oItem).to.not.be.an('undefined');
 

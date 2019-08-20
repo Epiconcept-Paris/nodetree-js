@@ -1,8 +1,8 @@
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
 
-import Nodetree from '../src';
-import Node from '../src/node';
+import Nodetree from '../lib';
+import Node from '../lib/indexed';
 
 const expectToNotBeUndefined = oItem => expect(oItem).to.not.be.an('undefined');
 
@@ -287,6 +287,22 @@ describe('getElementsByAttributes', () => {
   });
 });
 
+describe('getParentNodeByAttributes', () => {
+  // setup
+  const oNodeParent = new Node('id_parent');
+  const oNodeChild = new Node('id_child', { attribute1: 'value', attribute2: 'otherValue' });
+  const oNodeChild2 = new Node('id_child2', { attribute2: 'otherValue2' });
+  const oNodeChild3 = new Node('id_child3', { attribute3: 'value', attribute2: 'otherValue3' });
+  oNodeParent.append(oNodeChild);
+  oNodeChild.append(oNodeChild2);
+  oNodeChild2.append(oNodeChild3);
+
+  it('should be possible to get parent node by attributes', () => {
+    expect(oNodeChild3.getParentNodeByAttributes({ attribute2: 'otherValue' }))
+      .to.be.equal(oNodeChild);
+  });
+});
+
 describe('attribute', () => {
   // setup
   const oNode = new Node('id_parent', { attribute1: 'value_1' });
@@ -318,9 +334,6 @@ describe('benchmark', () => {
   const aStack = [oFirstNode];
   const oSuperArray = [oFirstNode];
 
-  // const oSTACK = {};
-
-
   while (iCount < iBench) {
     const oCurrent = aStack.pop();
 
@@ -331,25 +344,9 @@ describe('benchmark', () => {
       ++iCount;
 
       oLastNode = oNewNode;
-
-      // oSTACK[oNewNode.getId()] = oNewNode;
     }
-
-
     oSuperArray.push(oLastNode);
   }
-
-
-  // for (let i = 0; i < iMaxLoop; i++) {
-  //   const oNewNode = Nodetree.createNode();
-  //   oPreviousNode.append(oNewNode);
-  //   oPreviousNode = oNewNode;
-  //   iCount++;
-  //   for (let j = 0; j < iChildPerNode; j++) {
-  //     oPreviousNode.append(Nodetree.createNode());
-  //     iCount++;
-  //   }
-  // }
 
   console.log(iCount);
 
@@ -370,41 +367,12 @@ describe('benchmark', () => {
   it('should support a heavy tree for searching', (done) => {
     const iStart = Date.now();
 
-    // console.log(oFirstNode.getElementsByAttributes({ name: 'toto' }).length);
-
-    // console.log(Date.now() - iStart);
-
-    // iStart = Date.now();
-
-    // const getElementById = (oParent, sId) => {
-    //   if (oParent.getId() === sId) {
-    //     return oParent;
-    //   }
-
-    //   const oItem = oSTACK[sId];
-    //   if (oItem === undefined) {
-    //     return undefined;
-    //   }
-
-    //   let oNextParent = oItem.parentNode();
-    //   while (oNextParent !== undefined) {
-    //     // check attributes
-    //     if (oNextParent === oParent) {
-    //       return oItem;
-    //     }
-
-    //     // next
-    //     oNextParent = oNextParent.parentNode();
-    //   }
-
-    //   return undefined;
-    // };
+    console.log(oFirstNode.getElementsByAttributes({ name: 'toto' }).length);
 
     let iTmp = Date.now();
     for (let i = 0; i < 5; i++) {
       for (let j = 0; j < oSuperArray.length; j++) {
         expect(oFirstNode.getElementById(oSuperArray[j].getId())).to.be.equal(oSuperArray[j]);
-        // expect(getElementById(oFirstNode, oSuperArray[j].getId())).to.be.equal(oSuperArray[j]);
       }
 
       console.log('search', i + 1, ':', Date.now() - iTmp, 'ms');
