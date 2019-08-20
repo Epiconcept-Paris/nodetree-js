@@ -1,6 +1,3 @@
 module.exports = {
-	"extends": [
-		"xo/esnext",
-		"xo-react"
-	]
-}
+  extends: 'airbnb'
+};

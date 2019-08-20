@@ -6,14 +6,14 @@ const aAlphabet = ['a', 'z', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'q', 's', '
  * @method	errorLog
  * @param	{Error}		error
  */
-export const error_log = oError => {
-	if (oError) {
-		console.log('\n====================');
-		console.log(`Error Message: ${oError.message}`);
-		console.log('Stacktrace:');
-		console.log(oError.stack);
-		console.log('====================');
-	}
+export const error_log = (oError) => {
+  if (oError) {
+    console.log('\n====================');
+    console.log(`Error Message: ${oError.message}`);
+    console.log('Stacktrace:');
+    console.log(oError.stack);
+    console.log('====================');
+  }
 };
 
 /**
@@ -23,15 +23,15 @@ export const error_log = oError => {
  * @return  {string}
  */
 export const uniqId = () => {
-	let sRandomText = '';
-	for (let i = 0; i < 10; i++) {
-		sRandomText += aAlphabet[Math.floor(Math.random() * aAlphabet.length)];
-	}
+  let sRandomText = '';
+  for (let i = 0; i < 10; i++) {
+    sRandomText += aAlphabet[Math.floor(Math.random() * aAlphabet.length)];
+  }
 
-	return sRandomText + Date.now();
+  return sRandomText + Date.now();
 };
 
 export default {
-	error_log,
-	uniqId
+  error_log,
+  uniqId,
 };
