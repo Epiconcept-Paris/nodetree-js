@@ -95,6 +95,9 @@ describe('insert', () => {
     };
 
     expect(oNodeParent.toString()).to.be.equal(JSON.stringify(oExpectedJson));
+
+    expect(oNodeParent.getElementById('id_child5')).to.not.be.an('undefined');
+    expect(oNodeParent.getElementById('id_child5').getId()).to.be.equal('id_child5');
   });
 
   it('should be possible to insert a node before another one', () => {
@@ -125,6 +128,9 @@ describe('insert', () => {
     };
 
     expect(oNodeParent.toString()).to.be.equal(JSON.stringify(oExpectedJson));
+
+    expect(oNodeParent.getElementById('id_child5')).to.not.be.an('undefined');
+    expect(oNodeParent.getElementById('id_child5').getId()).to.be.equal('id_child5');
   });
 
   it('should be possible to insert a node after another one', () => {
@@ -158,6 +164,9 @@ describe('insert', () => {
     expect(oNodeParent.toString()).to.be.equal(JSON.stringify(oExpectedJson));
 
     expect(oNodeParent.getElementById('id_child6')).to.not.be.an('undefined');
+
+    expect(oNodeParent.getElementById('id_child5')).to.not.be.an('undefined');
+    expect(oNodeParent.getElementById('id_child5').getId()).to.be.equal('id_child5');
   });
 });
 
@@ -179,6 +188,9 @@ describe('append', () => {
 
     oNodeChild2.append(oNodeChild3);
     expect(oNodeParent.getElementById('id_child3')).to.not.be.an('undefined');
+
+    expect(oNodeParent.getElementById('id_child2')).to.not.be.an('undefined');
+    expect(oNodeParent.getElementById('id_child2').getId()).to.be.equal('id_child2');
   });
 });
 
@@ -215,6 +227,9 @@ describe('prepend', () => {
       ],
     };
     expect(oNodeParent.toString()).to.be.equal(JSON.stringify(oExpectedJson2));
+
+    expect(oNodeParent.getElementById('id_child2')).to.not.be.an('undefined');
+    expect(oNodeParent.getElementById('id_child2').getId()).to.be.equal('id_child2');
   });
 });
 
@@ -254,17 +269,24 @@ describe('getElementById', () => {
   const oNodeParent = new Node('id_parent');
   const oNodeChild = new Node('id_child');
   const oNodeChild2 = new Node('id_child2');
+  const oNodeChild3 = new Node('id_child3');
   oNodeParent.append(oNodeChild);
   oNodeChild.append(oNodeChild2);
+  oNodeChild.append(oNodeChild3);
 
   it('should be possible to get a node using id', () => {
-    const oExpectedNodeParent = oNodeParent.getElementById('id_parent');
-    const oExpectedNodeChild = oNodeParent.getElementById('id_child');
-    const oExpectedNodeChild2 = oNodeParent.getElementById('id_child2');
+    expect(oNodeParent.getElementById('id_parent').toString()).to.be.equal(oNodeParent.toString());
+    expect(oNodeParent.getElementById('id_child').toString()).to.be.equal(oNodeChild.toString());
+    expect(oNodeParent.getElementById('id_child2').toString()).to.be.equal(oNodeChild2.toString());
 
-    expect(oExpectedNodeParent.toString()).to.be.equal(oNodeParent.toString());
-    expect(oExpectedNodeChild.toString()).to.be.equal(oNodeChild.toString());
-    expect(oExpectedNodeChild2.toString()).to.be.equal(oNodeChild2.toString());
+    expect(oNodeParent.getElementById('id_parent').toString()).to.be.equal(oNodeParent.toString());
+    expect(oNodeChild.getElementById('id_child').toString()).to.be.equal(oNodeChild.toString());
+    expect(oNodeChild2.getElementById('id_child2').toString()).to.be.equal(oNodeChild2.toString());
+  });
+
+  it('should not be possible to get a node using id who is not a child', () => {
+    expect(oNodeChild2.getElementById('id_child')).to.be.an('undefined');
+    expect(oNodeChild2.getElementById('id_child3')).to.be.an('undefined');
   });
 });
 
@@ -347,6 +369,9 @@ describe('indexes', () => {
   it('should keep indexes updated', () => {
     const oNode = Nodetree.loadFromJson(oJson);
 
+    expect(oNode.oRoot).to.be.equal(oNode);
+    expect(Object.keys(oNode.oRoot.oIndexes).length).to.be.equal(oNode.getChildren(true).length + 1);
+
     let sAllIds = oNode.getElementsByAttributes({}).map(oItem => oItem.getId()).sort().join();
     expect(typeof oNode.oIndexes).to.be.equal('object');
     expect(Object.keys(oNode.oIndexes).sort().join())
@@ -367,6 +392,28 @@ describe('indexes', () => {
   });
 });
 
+const trimTree = (oNode, iModulo = 4) => {
+  let iCount = 0;
+  const aStack = [oNode];
+  const aRemoved = [];
+
+  while (aStack.length !== 0) {
+    const oCurrent = aStack.pop();
+
+    if (iCount > 0 && iCount % iModulo === 0) {
+      oCurrent.removeFromParent();
+      aRemoved.push(oCurrent);
+    } else {
+      for (let i = 0; i < oCurrent.getChildren().length; i++) {
+        aStack.push(oCurrent.getChildren()[i]);
+      }
+    }
+
+    iCount++;
+  }
+  return aRemoved;
+};
+
 describe('benchmark', () => {
   const iBench = 50000;
   const iChildPerNode = 5;
@@ -375,7 +422,7 @@ describe('benchmark', () => {
 
   const iStartSetup = Date.now();
 
-  const oFirstNode = Nodetree.createNode();
+  const oFirstNode = Nodetree.createNode('id_parent');
   let oLastNode = oFirstNode;
 
   let iCount = 0;
@@ -429,6 +476,31 @@ describe('benchmark', () => {
     }
 
     console.log('all search:', Date.now() - iStart, 'ms');
+
+    done();
+  }).timeout(100000);
+
+  it('should support re-indexing a heavy tree', (done) => {
+    expect(oFirstNode.oRoot.getId()).to.be.equal('id_parent');
+    expect(Object.keys(oFirstNode.oRoot.oIndexes).length).to.be.equal(iCount + 1);
+
+    const aRemoved = trimTree(oFirstNode, 50);
+
+    expect(oFirstNode.oRoot.getId()).to.be.equal('id_parent');
+    expect(oFirstNode.oRoot).to.be.equal(oFirstNode);
+    expect(Object.keys(oFirstNode.oRoot.oIndexes).length).to.be.equal(oFirstNode.getChildren(true).length + 1);
+
+    let iRemovedCount = aRemoved.length;
+    for (let iIndex = 0; iIndex < aRemoved.length; iIndex++) {
+      const oItem = aRemoved[iIndex];
+      const iCountChild = oItem.getChildren(true).length;
+      iRemovedCount += iCountChild;
+
+      expect(oItem.oRoot).to.be.equal(oItem);
+      expect(Object.keys(oItem.oRoot.oIndexes).length).to.be.equal(iCountChild + 1);
+    }
+
+    expect(Object.keys(oFirstNode.oRoot.oIndexes).length).to.be.equal(iCount + 1 - iRemovedCount);
 
     done();
   }).timeout(100000);

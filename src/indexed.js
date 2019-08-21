@@ -20,6 +20,10 @@ const getRootNode = (oNode) => {
     oNextParent = oNextParent.parentNode();
   }
 
+  if (typeof oRoot === 'object' && oRoot !== null) {
+    oRoot.oRoot = oRoot;
+  }
+
   return oRoot;
 };
 
@@ -27,7 +31,7 @@ export default class IndexedNode extends Node {
   constructor(sId = uniqId(), oAttributes = {}, aChildNodes = []) {
     super(sId, oAttributes, aChildNodes);
 
-    this.oRoot = this;
+    this.oRoot = undefined;
   }
 
   parentNode(oPropParent) {
@@ -71,6 +75,7 @@ export default class IndexedNode extends Node {
       };
       for (let iIndexChild = 0; iIndexChild < aChilds.length; iIndexChild++) {
         const oChild = aChilds[iIndexChild];
+        oChild.oRoot = oNode;
         oNode.oIndexes[oChild.getId()] = oChild;
       }
 
