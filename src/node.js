@@ -215,7 +215,7 @@ export default class Node extends CachedNode {
    * @param   {object}oAttributes - { myAttribute: 'theValueWanted', mySecondAttribute: 'anotherOne' }
    * @return  {array}
    */
-  getElementsByAttributes(oAttributes) {
+  getElementsByAttributes(oAttributes = {}) {
     const aAttributesNames = Object.keys(oAttributes);
     const aOutput = [];
     const aVisitStack = [this];

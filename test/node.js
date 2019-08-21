@@ -319,8 +319,56 @@ describe('attribute', () => {
   });
 });
 
+describe('indexes', () => {
+  // setup
+  const oJson = {
+    id: 'id_parent',
+    attrs: {},
+    child: [
+      { id: 'id_child', attrs: {}, child: [] },
+      {
+        id: 'id_child3',
+        attrs: {},
+        child: [
+          {
+            id: 'id_child4',
+            attrs: {},
+            child: [
+              { id: 'id_child6', attrs: {}, child: [] },
+            ],
+          },
+          { id: 'id_child5', attrs: {}, child: [] },
+        ],
+      },
+      { id: 'id_child2', attrs: {}, child: [] },
+    ],
+  };
+
+  const oNode = Nodetree.loadFromJson(oJson);
+
+  it('should keep indexes updated', () => {
+    let sAllIds = oNode.getElementsByAttributes({}).map(oItem => oItem.getId()).sort().join();
+    expect(typeof oNode.oIndexes).to.be.equal('object');
+    expect(Object.keys(oNode.oIndexes).sort().join())
+      .to.be.equal(sAllIds);
+
+    const oNodeChild3 = oNode.getElementById('id_child3');
+    oNodeChild3.removeFromParent();
+
+    sAllIds = oNode.getElementsByAttributes({}).map(oItem => oItem.getId()).sort().join();
+    expect(typeof oNode.oIndexes).to.be.equal('object');
+    expect(Object.keys(oNode.oIndexes).sort().join())
+      .to.be.equal(sAllIds);
+
+    sAllIds = oNodeChild3.getElementsByAttributes({}).map(oItem => oItem.getId()).sort().join();
+    expect(typeof oNodeChild3.oIndexes).to.be.equal('object');
+    expect(Object.keys(oNodeChild3.oIndexes).sort().join())
+      .to.be.equal(sAllIds);
+  });
+});
+
 describe('benchmark', () => {
-  const iBench = 50000;
+  const iBench = 500;
   const iChildPerNode = 5;
 
   const oMemoryUsage = process.memoryUsage();

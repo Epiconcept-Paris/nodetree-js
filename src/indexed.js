@@ -47,14 +47,31 @@ export default class IndexedNode extends Node {
 
   removeChild(oNode) {
     if (super.removeChild(oNode)) {
+      const aChilds = oNode.getChildren(true);
       if (
         typeof oNode.oRoot === 'object' && oNode.oRoot !== null &&
         typeof oNode.oRoot.oIndexes === 'object' && oNode.oRoot.oIndexes !== null
       ) {
-        oNode.oRoot.oIndexes[oNode.getId()] = undefined;
+        const oRootIndexes = oNode.oRoot.oIndexes;
+        oRootIndexes[oNode.getId()] = undefined;
+        delete oRootIndexes[oNode.getId()];
+
+        for (let iIndexChild = 0; iIndexChild < aChilds.length; iIndexChild++) {
+          const oChild = aChilds[iIndexChild];
+          oRootIndexes[oChild.getId()] = undefined;
+          delete oRootIndexes[oChild.getId()];
+        }
       }
-      oNode.oRoot = undefined;
-      oNode.oIndexes = undefined;
+
+      // oNode become the new root of the detached nodes
+      oNode.oRoot = oNode;
+      oNode.oIndexes = {
+        [oNode.getId()]: oNode,
+      };
+      for (let iIndexChild = 0; iIndexChild < aChilds.length; iIndexChild++) {
+        const oChild = aChilds[iIndexChild];
+        oNode.oIndexes[oChild.getId()] = oChild;
+      }
 
       return true;
     }
@@ -94,7 +111,9 @@ export default class IndexedNode extends Node {
 
   mergeIndex(oNewIndexes) {
     if (typeof this.oIndexes !== 'object' || this.oIndexes === null) {
-      this.oIndexes = {};
+      this.oIndexes = {
+        [this.sId]: this,
+      };
     }
 
     if (typeof oNewIndexes !== 'object' || oNewIndexes === null) {
@@ -106,5 +125,28 @@ export default class IndexedNode extends Node {
       const sId = aIds[iIndex];
       this.oIndexes[sId] = oNewIndexes[sId];
     }
+  }
+
+  getChildren(bFlatList = false) {
+    if (bFlatList) {
+      const aOutput = [];
+      const aVisitStack = super.getChildren().slice();
+      while (aVisitStack.length !== 0) {
+        const oCurrent = aVisitStack.pop();
+
+        aOutput.push(oCurrent);
+
+        // for... is faster than
+        // aVisitStack.push(...oCurrent.getChildren());
+        const aChilds = oCurrent.getChildren();
+        for (let i = aChilds.length - 1; i > -1; i--) {
+          aVisitStack.push(aChilds[i]);
+        }
+      }
+
+      return aOutput;
+    }
+
+    return super.getChildren();
   }
 }
