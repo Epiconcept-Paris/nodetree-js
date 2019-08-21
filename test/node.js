@@ -344,9 +344,9 @@ describe('indexes', () => {
     ],
   };
 
-  const oNode = Nodetree.loadFromJson(oJson);
-
   it('should keep indexes updated', () => {
+    const oNode = Nodetree.loadFromJson(oJson);
+
     let sAllIds = oNode.getElementsByAttributes({}).map(oItem => oItem.getId()).sort().join();
     expect(typeof oNode.oIndexes).to.be.equal('object');
     expect(Object.keys(oNode.oIndexes).sort().join())
@@ -368,7 +368,7 @@ describe('indexes', () => {
 });
 
 describe('benchmark', () => {
-  const iBench = 500;
+  const iBench = 50000;
   const iChildPerNode = 5;
 
   const oMemoryUsage = process.memoryUsage();

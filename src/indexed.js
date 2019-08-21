@@ -34,6 +34,7 @@ export default class IndexedNode extends Node {
     const oParentNode = super.parentNode(oPropParent);
     if (typeof oPropParent === 'object' && oPropParent !== null) {
       this.oRoot = getRootNode(oParentNode);
+
       if (typeof this.oRoot.mergeIndex === 'function') {
         this.oRoot.mergeIndex(this.oIndexes);
         this.oRoot.oIndexes[this.sId] = this;
@@ -87,11 +88,20 @@ export default class IndexedNode extends Node {
       typeof this.oRoot !== 'object' || this.oRoot === null ||
       typeof this.oRoot.oIndexes !== 'object' || this.oRoot.oIndexes === null
     ) {
-      return undefined;
+      // fix if needed
+      this.oRoot = typeof this.oParentNode === 'object' && this.oParentNode !== null ? getRootNode(this.oParentNode) : this;
+
+      // check again
+      if (
+        typeof this.oRoot !== 'object' || this.oRoot === null ||
+        typeof this.oRoot.oIndexes !== 'object' || this.oRoot.oIndexes === null
+      ) {
+        return undefined;
+      }
     }
 
     const oItem = this.oRoot.oIndexes[sId];
-    if (oItem === undefined) {
+    if (typeof oItem !== 'object' || oItem === null) {
       return undefined;
     }
 

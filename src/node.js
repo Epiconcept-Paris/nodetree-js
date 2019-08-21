@@ -154,9 +154,10 @@ export default class Node extends CachedNode {
         const oJson = oNode;
         oNode = new Node(oJson.id, oJson.attrs);
         if (Array.isArray(oJson.child)) {
-          oJson.child.forEach((oChild) => {
+          for (let iIndex = 0; iIndex < oJson.child.length; iIndex++) {
+            const oChild = oJson.child[iIndex];
             oNode.append(oChild);
-          });
+          }
         }
       } else {
         errorLog(new Error('Can\'t append this object. Wrong type, we are supposed to only have Node.'));
