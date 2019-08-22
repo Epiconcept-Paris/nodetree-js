@@ -2,48 +2,61 @@ import { uniqId } from './utils';
 
 import Node from './node';
 
-const getRootNode = (oNode) => {
-  if (oNode === undefined) {
-    return undefined;
-  }
-
-  // get root
-  let oRoot = oNode;
-  if (typeof oNode.oRoot === 'object' && oNode.oRoot !== null) {
-    return oNode.oRoot;
-  }
-
-  let oNextParent = oNode.parentNode();
-  while (oNextParent !== undefined) {
-    oRoot = oNextParent;
-    // next
-    oNextParent = oNextParent.parentNode();
-  }
-
-  if (typeof oRoot === 'object' && oRoot !== null) {
-    oRoot.oRoot = oRoot;
-  }
-
-  return oRoot;
-};
-
 export default class IndexedNode extends Node {
   constructor(sId = uniqId(), oAttributes = {}, aChildNodes = []) {
     super(sId, oAttributes, aChildNodes);
 
-    this.oRoot = undefined;
+    this.oRoot = this;
+  }
+
+  getRootNode() {
+    if (typeof this.oRoot === 'object' && this.oRoot !== null && this.oRoot.oParentNode === undefined) {
+      return this.oRoot;
+    }
+
+    // get root
+    let oRoot = this;
+    let oParent = this.oParentNode;
+    while (oParent !== undefined) {
+      if (typeof oParent.oRoot === 'object' && oParent.oRoot !== null && oParent.oRoot.oParentNode === undefined) {
+        oRoot = oParent.oRoot;
+        break;
+      }
+
+      // next
+      oParent = oParent.oParentNode;
+    }
+
+    if (typeof oRoot === 'object' && oRoot !== null) {
+      this.oRoot = oRoot;
+
+      this.oRoot.mergeIndex(this.oIndexes);
+      this.oRoot.oIndexes[this.sId] = this;
+
+      if (this.oRoot !== this) {
+        this.oIndexes = undefined;
+      }
+    }
+
+    return oRoot;
+  }
+
+  compileRootNode() {
+    this.getRootNode();
   }
 
   parentNode(oPropParent) {
     const oParentNode = super.parentNode(oPropParent);
     if (typeof oPropParent === 'object' && oPropParent !== null) {
-      this.oRoot = getRootNode(oParentNode);
+      this.compileRootNode();
 
-      if (typeof this.oRoot.mergeIndex === 'function') {
-        this.oRoot.mergeIndex(this.oIndexes);
-        this.oRoot.oIndexes[this.sId] = this;
-
-        this.oIndexes = undefined;
+      // fix child indexes
+      const aChilds = this.getChildren(true);
+      for (let iIndexChild = 0; iIndexChild < aChilds.length; iIndexChild++) {
+        const oChild = aChilds[iIndexChild];
+        oChild.oRoot = this.oRoot;
+        oChild.oIndexes = undefined;
+        this.oRoot.oIndexes[oChild.sId] = oChild;
       }
     }
 
@@ -69,16 +82,17 @@ export default class IndexedNode extends Node {
       }
 
       // oNode become the new root of the detached nodes
-      oNode.oRoot = oNode;
-      oNode.oIndexes = {
-        [oNode.getId()]: oNode,
-      };
+      oNode.oRoot = undefined;
+      oNode.oIndexes = undefined;
+      oNode.compileRootNode();
+
       for (let iIndexChild = 0; iIndexChild < aChilds.length; iIndexChild++) {
         const oChild = aChilds[iIndexChild];
-        oChild.oRoot = oNode;
-        oNode.oIndexes[oChild.getId()] = oChild;
-      }
 
+        oChild.oRoot = undefined;
+        oChild.oIndexes = undefined;
+        oChild.compileRootNode();
+      }
       return true;
     }
     return false;
@@ -90,19 +104,20 @@ export default class IndexedNode extends Node {
     }
 
     if (
-      typeof this.oRoot !== 'object' || this.oRoot === null ||
-      typeof this.oRoot.oIndexes !== 'object' || this.oRoot.oIndexes === null
+      typeof this.oRoot !== 'object' || this.oRoot === null
+      // typeof this.oRoot.oIndexes !== 'object' || this.oRoot.oIndexes === null
     ) {
       // fix if needed
-      this.oRoot = typeof this.oParentNode === 'object' && this.oParentNode !== null ? getRootNode(this.oParentNode) : this;
+      this.compileRootNode();
+      // this.oRoot = typeof this.oParentNode === 'object' && this.oParentNode !== null ? getRootNode(this.oParentNode) : this;
 
       // check again
-      if (
-        typeof this.oRoot !== 'object' || this.oRoot === null ||
-        typeof this.oRoot.oIndexes !== 'object' || this.oRoot.oIndexes === null
-      ) {
-        return undefined;
-      }
+      // if (
+      //   typeof this.oRoot !== 'object' || this.oRoot === null ||
+      //   typeof this.oRoot.oIndexes !== 'object' || this.oRoot.oIndexes === null
+      // ) {
+      //   return undefined;
+      // }
     }
 
     const oItem = this.oRoot.oIndexes[sId];
@@ -125,10 +140,10 @@ export default class IndexedNode extends Node {
   }
 
   mergeIndex(oNewIndexes) {
+    this.oRoot = this;
     if (typeof this.oIndexes !== 'object' || this.oIndexes === null) {
-      this.oIndexes = {
-        [this.sId]: this,
-      };
+      this.oIndexes = {};
+      this.oIndexes[this.sId] = this;
     }
 
     if (typeof oNewIndexes !== 'object' || oNewIndexes === null) {
@@ -154,8 +169,8 @@ export default class IndexedNode extends Node {
         // for... is faster than
         // aVisitStack.push(...oCurrent.getChildren());
         const aChilds = oCurrent.getChildren();
-        for (let i = aChilds.length - 1; i > -1; i--) {
-          aVisitStack.push(aChilds[i]);
+        for (let iIndex = 0; iIndex < aChilds.length; iIndex++) {
+          aVisitStack.push(aChilds[iIndex]);
         }
       }
 

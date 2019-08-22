@@ -95,7 +95,6 @@ describe('insert', () => {
     };
 
     expect(oNodeParent.toString()).to.be.equal(JSON.stringify(oExpectedJson));
-
     expect(oNodeParent.getElementById('id_child5')).to.not.be.an('undefined');
     expect(oNodeParent.getElementById('id_child5').getId()).to.be.equal('id_child5');
   });
@@ -430,7 +429,7 @@ describe('benchmark', () => {
   const oSuperArray = [oFirstNode];
 
   while (iCount < iBench) {
-    const oCurrent = aStack.pop();
+    const oCurrent = aStack.shift();
 
     for (let i = 0; i < iChildPerNode; i++) {
       const oNewNode = Nodetree.createNode();
@@ -484,23 +483,60 @@ describe('benchmark', () => {
     expect(oFirstNode.oRoot.getId()).to.be.equal('id_parent');
     expect(Object.keys(oFirstNode.oRoot.oIndexes).length).to.be.equal(iCount + 1);
 
-    const aRemoved = trimTree(oFirstNode, 50);
+    const aRemoved = trimTree(oFirstNode, 15);
 
     expect(oFirstNode.oRoot.getId()).to.be.equal('id_parent');
     expect(oFirstNode.oRoot).to.be.equal(oFirstNode);
+    expect(oFirstNode.oParentNode).to.be.an('undefined');
     expect(Object.keys(oFirstNode.oRoot.oIndexes).length).to.be.equal(oFirstNode.getChildren(true).length + 1);
 
     let iRemovedCount = aRemoved.length;
     for (let iIndex = 0; iIndex < aRemoved.length; iIndex++) {
       const oItem = aRemoved[iIndex];
-      const iCountChild = oItem.getChildren(true).length;
+      const aItemChildren = oItem.getChildren(true);
+      const iCountChild = aItemChildren.length;
       iRemovedCount += iCountChild;
 
+      expect(oFirstNode.getElementById(oItem.getId())).to.be.an('undefined');
       expect(oItem.oRoot).to.be.equal(oItem);
+      expect(oItem.oParentNode).to.be.an('undefined');
       expect(Object.keys(oItem.oRoot.oIndexes).length).to.be.equal(iCountChild + 1);
+      if (iCountChild !== 0) {
+        expect(oItem.getElementById(aItemChildren[iCountChild - 1].getId())).to.not.be.an('undefined');
+      }
+
+      // for (let iIndexChild = 0; iIndexChild < iCountChild; iIndexChild++) {
+      //   const oItemChild = aItemChildren[iIndexChild];
+      //   expect(oItemChild.oRoot).to.be.equal(oItem);
+      //   expect(oItemChild.oParentNode).to.not.be.an('undefined');
+      //   expect(Object.keys(oItemChild.oRoot.oIndexes).length).to.be.equal(iCountChild + 1);
+      //   expect(oItem.getElementById(oItemChild.getId())).to.not.be.an('undefined');
+      // }
+
+      // if (iCountChild !== 0) {
+      //   const oNewNode = new Node('last_node');
+      //   aItemChildren[iCountChild - 1].append(oNewNode);
+      //   expect(oItem.getElementById('last_node')).to.be.equal(oNewNode);
+      // }
     }
 
     expect(Object.keys(oFirstNode.oRoot.oIndexes).length).to.be.equal(iCount + 1 - iRemovedCount);
+
+    for (let iIndex = 0; iIndex < aRemoved.length; iIndex++) {
+      const oItem = aRemoved[iIndex];
+      oFirstNode.append(oItem);
+
+      const aItemChildren = oItem.getChildren(true);
+      for (let iIndexChild = 0; iIndexChild < aItemChildren.length; iIndexChild++) {
+        const oItemChild = aItemChildren[iIndexChild];
+        expect(oItemChild).to.not.be.an('undefined');
+        expect(oItemChild.oParentNode).to.not.be.an('undefined');
+        expect(oItemChild.oRoot).to.not.be.an('undefined');
+
+        expect(oItemChild.oRoot === oFirstNode).to.be.equal(true);
+      //   expect(oFirstNode.getElementById(oItemChild)).to.be.equal(oItemChild);
+      }
+    }
 
     done();
   }).timeout(100000);
