@@ -389,6 +389,23 @@ describe('indexes', () => {
     expect(Object.keys(oNodeChild3.oIndexes).sort().join())
       .to.be.equal(sAllIds);
   });
+
+  it('should be able to reindex the tree', () => {
+    const oNode = Nodetree.loadFromJson(oJson);
+
+    oNode.reindexTree();
+
+    let sIds = ['id_parent', 'id_child', 'id_child2', 'id_child3', 'id_child4', 'id_child5', 'id_child6'].sort().join();
+    expect(typeof oNode.oRoot.oIndexes).to.be.equal('object');
+    expect(oNode.oRoot.oIndexes).to.not.be.equal(null);
+    expect(Object.keys(oNode.oRoot.oIndexes).sort().join()).to.be.equal(sIds);
+
+    oNode.getElementById('id_child4').removeFromParent();
+    oNode.reindexTree();
+
+    sIds = ['id_parent', 'id_child', 'id_child2', 'id_child3', 'id_child5'].sort().join();
+    expect(Object.keys(oNode.oRoot.oIndexes).sort().join()).to.be.equal(sIds);
+  });
 });
 
 const trimTree = (oNode, iModulo = 4) => {
@@ -447,7 +464,7 @@ describe('benchmark', () => {
   oLastNode.setAttribute('name', 'toto');
   const oNewMemoryUsage = process.memoryUsage();
 
-  const transformToMb = (iSize) => (Math.round((iSize / 1024 / 1024) * 100) / 100)
+  const transformToMb = iSize => (Math.round((iSize / 1024 / 1024) * 100) / 100);
 
   console.log(
     'rss:', transformToMb(oNewMemoryUsage.rss - oMemoryUsage.rss), 'MB',

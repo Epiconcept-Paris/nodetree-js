@@ -41,6 +41,24 @@ export default class IndexedNode extends Node {
     return oRoot;
   }
 
+  reindexTree() {
+    // Caution, heavy process
+    const oIndexes = {
+      [this.oRoot.sId]: this.oRoot,
+    };
+
+    const aChilds = this.oRoot.getChildren(true);
+    for (let iIndex = 0; iIndex < aChilds.length; iIndex++) {
+      const oItem = aChilds[iIndex];
+      oItem.oRoot = this.oRoot;
+      oItem.oIndexes = undefined;
+
+      oIndexes[oItem.sId] = oItem;
+    }
+
+    this.oRoot.oIndexes = oIndexes;
+  }
+
   compileRootNode() {
     this.getRootNode();
   }
@@ -105,19 +123,13 @@ export default class IndexedNode extends Node {
 
     if (
       typeof this.oRoot !== 'object' || this.oRoot === null
-      // typeof this.oRoot.oIndexes !== 'object' || this.oRoot.oIndexes === null
     ) {
       // fix if needed
       this.compileRootNode();
-      // this.oRoot = typeof this.oParentNode === 'object' && this.oParentNode !== null ? getRootNode(this.oParentNode) : this;
+    }
 
-      // check again
-      // if (
-      //   typeof this.oRoot !== 'object' || this.oRoot === null ||
-      //   typeof this.oRoot.oIndexes !== 'object' || this.oRoot.oIndexes === null
-      // ) {
-      //   return undefined;
-      // }
+    if (typeof this.oRoot.oIndexes !== 'object' || this.oRoot.oIndexes === null) {
+      // reindex the tree
     }
 
     const oItem = this.oRoot.oIndexes[sId];
