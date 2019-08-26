@@ -130,6 +130,7 @@ export default class IndexedNode extends Node {
 
     if (typeof this.oRoot.oIndexes !== 'object' || this.oRoot.oIndexes === null) {
       // reindex the tree
+      this.reindexTree();
     }
 
     const oItem = this.oRoot.oIndexes[sId];
