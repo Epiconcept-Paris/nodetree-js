@@ -173,7 +173,15 @@ export default class IndexedNode extends Node {
   getChildren(bFlatList = false) {
     if (bFlatList) {
       const aOutput = [];
-      const aVisitStack = super.getChildren().slice();
+      const aTopLevelChildrens = super.getChildren().slice();
+      if (aTopLevelChildrens.length < 1) {
+        return aOutput;
+      }
+
+      let iIndexInTopLevel = 0;
+      const aVisitStack = [aTopLevelChildrens[iIndexInTopLevel]];
+      iIndexInTopLevel += 1;
+
       while (aVisitStack.length !== 0) {
         const oCurrent = aVisitStack.pop();
 
@@ -182,8 +190,14 @@ export default class IndexedNode extends Node {
         // for... is faster than
         // aVisitStack.push(...oCurrent.getChildren());
         const aChilds = oCurrent.getChildren();
-        for (let iIndex = 0; iIndex < aChilds.length; iIndex++) {
-          aVisitStack.push(aChilds[iIndex]);
+        for (let i = aChilds.length - 1; i > -1; i--) {
+          aVisitStack.push(aChilds[i]);
+        }
+
+        if (aVisitStack.length === 0 && iIndexInTopLevel < aTopLevelChildrens.length) {
+          aVisitStack.push(aTopLevelChildrens[iIndexInTopLevel]);
+          // move to the next
+          iIndexInTopLevel += 1;
         }
       }
 

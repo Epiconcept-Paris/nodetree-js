@@ -340,6 +340,44 @@ describe('attribute', () => {
   });
 });
 
+describe('getChildren', () => {
+  // setup
+  const oJson = {
+    id: 'id_parent',
+    attrs: {},
+    child: [
+      { id: 'id_child', attrs: {}, child: [] },
+      {
+        id: 'id_child3',
+        attrs: {},
+        child: [
+          {
+            id: 'id_child4',
+            attrs: {},
+            child: [
+              { id: 'id_child6', attrs: {}, child: [] },
+            ],
+          },
+          { id: 'id_child5', attrs: {}, child: [] },
+        ],
+      },
+      { id: 'id_child2', attrs: {}, child: [] },
+    ],
+  };
+
+  const oNode = Nodetree.loadFromJson(oJson);
+
+  it('should be possible to get all children of a node', () => {
+    const aExpectedIds = ['id_child', 'id_child3', 'id_child2'];
+    expect(oNode.getChildren().map(oItem => oItem.getId())).to.deep.equal(aExpectedIds);
+  });
+
+  it('should be possible to get all children of a node as a flat array', () => {
+    const aExpectedIds = ['id_child', 'id_child3', 'id_child4', 'id_child6', 'id_child5', 'id_child2'];
+    expect(oNode.getChildren(true).map(oItem => oItem.getId())).to.deep.equal(aExpectedIds);
+  });
+});
+
 describe('indexes', () => {
   // setup
   const oJson = {
