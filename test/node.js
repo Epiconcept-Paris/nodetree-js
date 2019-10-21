@@ -190,6 +190,12 @@ describe('append', () => {
 
     expect(oNodeParent.getElementById('id_child2')).to.not.be.an('undefined');
     expect(oNodeParent.getElementById('id_child2').getId()).to.be.equal('id_child2');
+
+    oNodeChild2.append({ id: 'id_child4' });
+    expect(oNodeChild2.getElementById('id_child4').getId()).to.be.equal('id_child4');
+
+    oNodeChild2.getElementById('id_child4').append({ id: 'id_child5' });
+    expect(oNodeChild2.getElementById('id_child5').getId()).to.be.equal('id_child5');
   });
 });
 

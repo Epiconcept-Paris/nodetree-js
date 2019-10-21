@@ -206,4 +206,23 @@ export default class IndexedNode extends Node {
 
     return super.getChildren();
   }
+
+  /**
+   * Insert a node at a position in this node
+   * If no position is given, push to the end of the list
+   *
+   * @method  insertAtPosition
+   * @param   {Node}  oNode
+   * @param   {integer}   iPosition   - (optional)
+   * @return  {boolean}
+   */
+  insertAtPosition(oNode, iPosition) {
+    if ((oNode instanceof IndexedNode) === false && (oNode instanceof Node) === false) {
+      if (typeof oNode === 'object') {
+        return super.insertAtPosition(new IndexedNode(oNode.id, oNode.attrs), iPosition);
+      }
+    }
+
+    return super.insertAtPosition(oNode, iPosition);
+  }
 }
