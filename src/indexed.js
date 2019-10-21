@@ -219,7 +219,15 @@ export default class IndexedNode extends Node {
   insertAtPosition(oNode, iPosition) {
     if ((oNode instanceof IndexedNode) === false && (oNode instanceof Node) === false) {
       if (typeof oNode === 'object') {
-        return super.insertAtPosition(new IndexedNode(oNode.id, oNode.attrs), iPosition);
+        const oJson = oNode;
+        const oNewNode = new IndexedNode(oJson.id, oJson.attrs);
+        if (Array.isArray(oJson.child)) {
+          for (let iIndex = 0; iIndex < oJson.child.length; iIndex += 1) {
+            const oChild = oJson.child[iIndex];
+            oNewNode.append(oChild);
+          }
+        }
+        return super.insertAtPosition(oNewNode, iPosition);
       }
     }
 

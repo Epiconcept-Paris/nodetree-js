@@ -196,6 +196,14 @@ describe('append', () => {
 
     oNodeChild2.getElementById('id_child4').append({ id: 'id_child5' });
     expect(oNodeChild2.getElementById('id_child5').getId()).to.be.equal('id_child5');
+
+    oNodeChild2.append({
+      id: 'id_child6',
+      child: [{ id: 'id_child7', child: [{ id: 'id_child8' }] }],
+    });
+    expect(oNodeChild2.getElementById('id_child8').getId()).to.be.equal('id_child8');
+    expect(oNodeParent.getElementById('id_child8').parentNode().getId()).to.be.equal('id_child7');
+    expect(oNodeParent.getElementById('id_child7').parentNode().getId()).to.be.equal('id_child6');
   });
 });
 
