@@ -338,7 +338,13 @@ export default class Node extends CachedNode {
    * @return  {string}
    */
   toString(bImmediateScope) {
-    return JSON.stringify(this.toJson(bImmediateScope));
+    const oJson = this.toJson(bImmediateScope);
+
+    // All of this to make sure the output string has always keys in right order
+    const aAllKeys = [];
+    JSON.stringify(oJson, (key, value) => { aAllKeys.push(key); return value; });
+    aAllKeys.sort();
+    return JSON.stringify(oJson, aAllKeys);
   }
 
   /**
