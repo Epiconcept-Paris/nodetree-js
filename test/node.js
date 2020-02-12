@@ -6,6 +6,13 @@ import Node from '../lib/indexed';
 
 const expectToNotBeUndefined = oItem => expect(oItem).to.not.be.an('undefined');
 
+const stringifiedWithSortedKeys = (oJson) => {
+  const aAllKeys = [];
+  JSON.stringify(oJson, (key, value) => { aAllKeys.push(key); return value; });
+  aAllKeys.sort();
+  return JSON.stringify(oJson, aAllKeys);
+}
+
 describe('creation', () => {
   it('should be possible to create a node without arguments', () => {
     expectToNotBeUndefined(new Node());
@@ -22,7 +29,7 @@ describe('creation', () => {
     const oNode = new Node(sId, oAttributes);
     expectToNotBeUndefined(oNode);
     expect(oNode.sId).to.be.equal(sId);
-    expect(JSON.stringify(oNode.oAttributes)).to.be.equal(JSON.stringify(oAttributes));
+    expect(stringifiedWithSortedKeys(oNode.oAttributes)).to.be.equal(stringifiedWithSortedKeys(oAttributes));
   });
 });
 
@@ -31,23 +38,23 @@ describe('serialize', () => {
   const oNodeParent = new Node('id_parent');
 
   it('should be possible to serialize the node as a string', () => {
-    expect(oNodeParent.toString()).to.be.equal('{"id":"id_parent","attrs":{},"child":[]}');
+    expect(oNodeParent.toString()).to.be.equal('{"attrs":{},"child":[],"id":"id_parent"}');
   });
   it('should be possible to serialize the node as a json', () => {
     const oJson = oNodeParent.toJson();
     const oJsonSerialize = oNodeParent.serialize();
 
     // should be the same json
-    expect(JSON.stringify(oJson)).to.be.equal(JSON.stringify(oJsonSerialize));
+    expect(stringifiedWithSortedKeys(oJson)).to.be.equal(stringifiedWithSortedKeys(oJsonSerialize));
 
     // should be this one
     const oExpectedJson = { id: 'id_parent', attrs: {}, child: [] };
-    expect(JSON.stringify(oJson)).to.be.equal(JSON.stringify(oExpectedJson));
-    expect(JSON.stringify(oJsonSerialize)).to.be.equal(JSON.stringify(oExpectedJson));
+    expect(stringifiedWithSortedKeys(oJson)).to.be.equal(stringifiedWithSortedKeys(oExpectedJson));
+    expect(stringifiedWithSortedKeys(oJsonSerialize)).to.be.equal(stringifiedWithSortedKeys(oExpectedJson));
   });
   it('should be possible to generate a hashcode from the node', () => {
-    expect(oNodeParent.hashcode()).to.be.equal(1357554261);
-    expect(oNodeParent.legacyHashcode()).to.be.equal(-1918605369);
+    expect(oNodeParent.hashcode()).to.be.equal(-1718511787);
+    // expect(oNodeParent.legacyHashcode()).to.be.equal(-1918605369);
   });
 });
 
@@ -94,7 +101,7 @@ describe('insert', () => {
       ],
     };
 
-    expect(oNodeParent.toString()).to.be.equal(JSON.stringify(oExpectedJson));
+    expect(oNodeParent.toString()).to.be.equal(stringifiedWithSortedKeys(oExpectedJson));
     expect(oNodeParent.getElementById('id_child5')).to.not.be.an('undefined');
     expect(oNodeParent.getElementById('id_child5').getId()).to.be.equal('id_child5');
   });
@@ -126,7 +133,7 @@ describe('insert', () => {
       ],
     };
 
-    expect(oNodeParent.toString()).to.be.equal(JSON.stringify(oExpectedJson));
+    expect(oNodeParent.toString()).to.be.equal(stringifiedWithSortedKeys(oExpectedJson));
 
     expect(oNodeParent.getElementById('id_child5')).to.not.be.an('undefined');
     expect(oNodeParent.getElementById('id_child5').getId()).to.be.equal('id_child5');
@@ -160,7 +167,7 @@ describe('insert', () => {
       ],
     };
 
-    expect(oNodeParent.toString()).to.be.equal(JSON.stringify(oExpectedJson));
+    expect(oNodeParent.toString()).to.be.equal(stringifiedWithSortedKeys(oExpectedJson));
 
     expect(oNodeParent.getElementById('id_child6')).to.not.be.an('undefined');
 
@@ -179,11 +186,11 @@ describe('append', () => {
   it('should be possible to append a node', () => {
     // appendChild
     oNodeParent.appendChild(oNodeChild);
-    expect(oNodeParent.toString()).to.be.equal('{"id":"id_parent","attrs":{},"child":[{"id":"id_child","attrs":{},"child":[]}]}');
+    expect(oNodeParent.toString()).to.be.equal('{"attrs":{},"child":[{"attrs":{},"child":[],"id":"id_child"}],"id":"id_parent"}');
 
     // append
     oNodeChild.append(oNodeChild2);
-    expect(oNodeParent.toString()).to.be.equal('{"id":"id_parent","attrs":{},"child":[{"id":"id_child","attrs":{},"child":[{"id":"id_child2","attrs":{},"child":[]}]}]}');
+    expect(oNodeParent.toString()).to.be.equal('{"attrs":{},"child":[{"attrs":{},"child":[{"attrs":{},"child":[],"id":"id_child2"}],"id":"id_child"}],"id":"id_parent"}');
 
     oNodeChild2.append(oNodeChild3);
     expect(oNodeParent.getElementById('id_child3')).to.not.be.an('undefined');
@@ -226,7 +233,7 @@ describe('prepend', () => {
         { id: 'id_child', attrs: {}, child: [] },
       ],
     };
-    expect(oNodeParent.toString()).to.be.equal(JSON.stringify(oExpectedJson));
+    expect(oNodeParent.toString()).to.be.equal(stringifiedWithSortedKeys(oExpectedJson));
 
     // prepend
     oNodeParent.prepend(oNodeChild3);
@@ -239,7 +246,7 @@ describe('prepend', () => {
         { id: 'id_child', attrs: {}, child: [] },
       ],
     };
-    expect(oNodeParent.toString()).to.be.equal(JSON.stringify(oExpectedJson2));
+    expect(oNodeParent.toString()).to.be.equal(stringifiedWithSortedKeys(oExpectedJson2));
 
     expect(oNodeParent.getElementById('id_child2')).to.not.be.an('undefined');
     expect(oNodeParent.getElementById('id_child2').getId()).to.be.equal('id_child2');
@@ -247,32 +254,38 @@ describe('prepend', () => {
 });
 
 describe('remove', () => {
-  // setup
-  const oNodeParent = new Node('id_parent');
-  const oNodeChild = new Node('id_child');
-  const oNodeChild2 = new Node('id_child2');
-  oNodeParent.appendChild(oNodeChild);
-  oNodeChild.append(oNodeChild2);
-
   it('should be possible to remove a child node', () => {
+    // setup
+    const oNodeParent = new Node('id_parent');
+    const oNodeChild = new Node('id_child');
+    const oNodeChild2 = new Node('id_child2');
+    oNodeParent.appendChild(oNodeChild);
+    oNodeChild.append(oNodeChild2);
+
     // removeChild
     oNodeParent.removeChild(oNodeChild);
-    expect(oNodeParent.toString()).to.be.equal('{"id":"id_parent","attrs":{},"child":[]}');
-    expect(oNodeChild.toString()).to.be.equal('{"id":"id_child","attrs":{},"child":[{"id":"id_child2","attrs":{},"child":[]}]}');
+    expect(oNodeParent.toString()).to.be.equal('{"attrs":{},"child":[],"id":"id_parent"}');
+    expect(oNodeChild.toString()).to.be.equal('{"attrs":{},"child":[{"attrs":{},"child":[],"id":"id_child2"}],"id":"id_child"}');
     expect(oNodeParent.getElementById(oNodeChild.getId())).to.be.an('undefined');
 
     // remove
     oNodeChild.remove(oNodeChild2);
-    expect(oNodeChild.toString()).to.be.equal('{"id":"id_child","attrs":{},"child":[]}');
+    expect(oNodeChild.toString()).to.be.equal('{"attrs":{},"child":[],"id":"id_child"}');
     expect(oNodeChild.getElementById(oNodeChild2.getId())).to.be.an('undefined');
   });
+
   it('should be possible to remove a node as a child', () => {
+    // setup
+    const oNodeParent = new Node('id_parent');
+    const oNodeChild = new Node('id_child');
+
     // setup, add a child
     oNodeParent.append(oNodeChild);
-    expect(oNodeParent.toString()).to.be.equal('{"id":"id_parent","attrs":{},"child":[{"id":"id_child","attrs":{},"child":[]}]}');
+
+    expect(oNodeParent.toString()).to.be.equal('{"attrs":{},"child":[{"attrs":{},"child":[],"id":"id_child"}],"id":"id_parent"}');
     // remove using the child
     oNodeChild.removeFromParent(oNodeParent);
-    expect(oNodeParent.toString()).to.be.equal('{"id":"id_parent","attrs":{},"child":[]}');
+    expect(oNodeParent.toString()).to.be.equal('{"attrs":{},"child":[],"id":"id_parent"}');
     expect(oNodeParent.getElementById(oNodeChild.getId())).to.be.an('undefined');
   });
 });
@@ -344,9 +357,9 @@ describe('attribute', () => {
 
   it('should be possible to set the value of an attribute', () => {
     oNode.setAttribute('attribute2', 'value_2');
-    expect(oNode.toString()).to.be.equal('{"id":"id_parent","attrs":{"attribute1":"value_1","attribute2":"value_2"},"child":[]}');
+    expect(oNode.toString()).to.be.equal('{"attrs":{"attribute1":"value_1","attribute2":"value_2"},"child":[],"id":"id_parent"}');
     oNode.setAttribute('attribute1', 'new_value_1');
-    expect(oNode.toString()).to.be.equal('{"id":"id_parent","attrs":{"attribute1":"new_value_1","attribute2":"value_2"},"child":[]}');
+    expect(oNode.toString()).to.be.equal('{"attrs":{"attribute1":"new_value_1","attribute2":"value_2"},"child":[],"id":"id_parent"}');
   });
   it('should be possible to retrieve the value of an attribute', () => {
     const sValueAttribute = oNode.getAttribute('attribute2');

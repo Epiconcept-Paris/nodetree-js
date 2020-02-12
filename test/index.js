@@ -5,6 +5,13 @@ import Nodetree from '../lib';
 
 const expectToNotBeUndefined = oItem => expect(oItem).to.not.be.an('undefined');
 
+const stringifiedWithSortedKeys = (oJson) => {
+  const aAllKeys = [];
+  JSON.stringify(oJson, (key, value) => { aAllKeys.push(key); return value; });
+  aAllKeys.sort();
+  return JSON.stringify(oJson, aAllKeys);
+};
+
 describe('creation', () => {
   it('should be possible to create a node without arguments', () => {
     const oNode = Nodetree.createNode();
@@ -22,7 +29,7 @@ describe('creation', () => {
     const oNode = Nodetree.createNode(sId, oAttributes);
     expectToNotBeUndefined(oNode);
     expect(oNode.getId()).to.be.equal(sId);
-    expect(JSON.stringify(oNode.getAttributes())).to.be.equal(JSON.stringify(oAttributes));
+    expect(stringifiedWithSortedKeys(oNode.getAttributes())).to.be.equal(JSON.stringify(oAttributes));
   });
 });
 
@@ -45,7 +52,7 @@ describe('loading existing node', () => {
       { id: 'id_child3', attrs: {}, child: [] },
     ],
   };
-  const sReferenceString = JSON.stringify(oReferenceJson);
+  const sReferenceString = stringifiedWithSortedKeys(oReferenceJson);
 
   it('shoud be possible to load an entiere tree architecture from a string', () => {
     const oNode = Nodetree.loadFromString(sReferenceString);
